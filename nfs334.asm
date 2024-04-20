@@ -23,7 +23,6 @@ l0000                   = &0000
 l0001                   = &0001
 l0002                   = &0002
 l0003                   = &0003
-l000f                   = &000f
 l0010                   = &0010
 l0011                   = &0011
 l0012                   = &0012
@@ -31,7 +30,6 @@ l0013                   = &0013
 l0014                   = &0014
 l0015                   = &0015
 l0016                   = &0016
-l0020                   = &0020
 l0036                   = &0036
 l003a                   = &003a
 l0055                   = &0055
@@ -39,7 +37,6 @@ l0057                   = &0057
 l0058                   = &0058
 l0059                   = &0059
 l005a                   = &005a
-l0063                   = &0063
 l009a                   = &009a
 l009b                   = &009b
 l009c                   = &009c
@@ -192,16 +189,8 @@ l0fde                   = &0fde
 l0fdf                   = &0fdf
 l0fe0                   = &0fe0
 l212e                   = &212e
-l464e                   = &464e
-l4db9                   = &4db9
-l6269                   = &6269
-l6c43                   = &6c43
-l6f4e                   = &6f4e
-l8c0d                   = &8c0d
 l944c                   = &944c
 c954c                   = &954c
-la00d                   = &a00d
-lbc28                   = &bc28
 econet_INTOFF           = &fe18
 econet_station_id       = &fe18
 econet_INTON            = &fe20
@@ -246,6 +235,7 @@ oscli                   = &fff7
 ; econet_station_id = &2000 (or any address you choose)
 ; econet_INTOFF     = &fe38
 ; econet_INTON      = &fe3c
+; *****************************************************
 
 ; Sideways ROM header
 ; &8000 referenced 2 times by &048b, &9bb8
@@ -582,10 +572,7 @@ l8014 = l800d+7
 
 .sub_c81bc
     jsr print_message_and_fall_through                                ; 81bc: 20 3b 85     ;.
-; overlapping: ora l464e                                              ; 81bf: 0d 4e 46    .NF
-    equb &0d                                                          ; 81bf: 0d          .
-    equs "NFS 3.34"                                                   ; 81c0: 4e 46 53... NFS
-    equb &0d                                                          ; 81c8: 0d          .
+    equs &0d, "NFS 3.34", &0d                                         ; 81bf: 0d 4e 46... .NF
 
 ; &81c9 referenced 2 times by &8182, &81de
 .c81c9
@@ -611,8 +598,6 @@ l8014 = l800d+7
 ; &81e6 referenced 1 time by &81da
 .c81e6
     jsr print_message_and_fall_through                                ; 81e6: 20 3b 85     ;.
-; Comment removed
-; overlapping: eor l0063                                              ; 81e9: 45 63       Ec
     equs "Econet Station "                                            ; 81e9: 45 63 6f... Eco
 
     lda l0d62                                                         ; 81f8: ad 62 0d    .b.
@@ -621,21 +606,17 @@ l8014 = l800d+7
     bit econet_adlc_address_1                                         ; 8200: 2c a1 fe    ,..
     beq c8212                                                         ; 8203: f0 0d       ..
     jsr print_message_and_fall_through                                ; 8205: 20 3b 85     ;.
-; overlapping: jsr l6f4e                                              ; 8208: 20 4e 6f     No
     equs " No Clock"                                                  ; 8208: 20 4e 6f...  No
-; overlapping: jsr l6c43                                              ; 820b: 20 43 6c     Cl
 
     nop                                                               ; 8211: ea          .
 ; &8212 referenced 1 time by &8203
 .c8212
     jsr print_message_and_fall_through                                ; 8212: 20 3b 85     ;.
-; overlapping: ora la00d                                              ; 8215: 0d 0d a0    ...
-    equb &0d, &0d                                                     ; 8215: 0d 0d       ..
+    equs &0d, &0d                                                     ; 8215: 0d 0d       ..
 
 ; &8217 referenced 1 time by &8199
 .c8217
     ldy #&0d                                                          ; 8217: a0 0d       ..
-; overlapping: ora l4db9                                              ; 8218: 0d b9 4d    ..M
 ; &8219 referenced 1 time by &8220
 .loop_c8219
     lda l824d,y                                                       ; 8219: b9 4d 82    .M.
@@ -2369,31 +2350,25 @@ l8014 = l800d+7
     ldx #3                                                            ; 8c1b: a2 03       ..
     jsr sub_c8d4f                                                     ; 8c1d: 20 4f 8d     O.
     jsr print_message_and_fall_through                                ; 8c20: 20 3b 85     ;.
-; overlapping: plp                                                    ; 8c23: 28          (
     equs "("                                                          ; 8c23: 28          (
 
     lda l0f13                                                         ; 8c24: ad 13 0f    ...
     jsr sub_c85af                                                     ; 8c27: 20 af 85     ..
     jsr print_message_and_fall_through                                ; 8c2a: 20 3b 85     ;.
-; overlapping: and #&a2                                               ; 8c2d: 29 a2       ).
     equs ")"                                                          ; 8c2d: 29          )
 
     ldx #5                                                            ; 8c2e: a2 05       ..
-; overlapping: ora l0020                                              ; 8c2f: 05 20       .
     jsr c8d5c                                                         ; 8c30: 20 5c 8d     \.
     ldx l0f12                                                         ; 8c33: ae 12 0f    ...
     bne c8c43                                                         ; 8c36: d0 0b       ..
     jsr print_message_and_fall_through                                ; 8c38: 20 3b 85     ;.
-    equs "Owner"                                                      ; 8c3b: 4f 77 6e... Own
-    equb &0d                                                          ; 8c40: 0d          .
+    equs "Owner", &0d                                                 ; 8c3b: 4f 77 6e... Own
 
     bne c8c4d                                                         ; 8c41: d0 0a       ..
 ; &8c43 referenced 1 time by &8c36
 .c8c43
     jsr print_message_and_fall_through                                ; 8c43: 20 3b 85     ;.
-; overlapping: bvc l8cbd                                              ; 8c46: 50 75       Pu
-    equs "Public"                                                     ; 8c46: 50 75 62... Pub
-    equb &0d                                                          ; 8c4c: 0d          .
+    equs "Public", &0d                                                ; 8c46: 50 75 62... Pub
 
 ; &8c4d referenced 1 time by &8c41
 .c8c4d
@@ -2411,7 +2386,6 @@ l8014 = l800d+7
     tax                                                               ; 8c6a: aa          .
     jsr sub_c85eb                                                     ; 8c6b: 20 eb 85     ..
     jsr print_message_and_fall_through                                ; 8c6e: 20 3b 85     ;.
-; overlapping: jsr lbc28                                              ; 8c71: 20 28 bc     (.
     equs " ("                                                         ; 8c71: 20 28        (
 
     ldy l8d4b,x                                                       ; 8c73: bc 4b 8d    .K.
@@ -2425,27 +2399,21 @@ l8014 = l800d+7
 ; &8c81 referenced 1 time by &8c79
 .c8c81
     jsr print_message_and_fall_through                                ; 8c81: 20 3b 85     ;.
-; overlapping: and #&0d                                               ; 8c84: 29 0d       ).
-    equs ")"                                                          ; 8c84: 29          )
-    equb &0d                                                          ; 8c85: 0d          .
-    equs "Dir. "                                                      ; 8c86: 44 69 72... Dir
+    equs ")", &0d, "Dir. "                                            ; 8c84: 29 0d 44... ).D
 
     ldx #&11                                                          ; 8c8b: a2 11       ..
     jsr sub_c8d4f                                                     ; 8c8d: 20 4f 8d     O.
     ldx #5                                                            ; 8c90: a2 05       ..
     jsr c8d5c                                                         ; 8c92: 20 5c 8d     \.
     jsr print_message_and_fall_through                                ; 8c95: 20 3b 85     ;.
-; overlapping: jmp l6269                                              ; 8c98: 4c 69 62    Lib
     equs "Lib. "                                                      ; 8c98: 4c 69 62... Lib
 
     ldx #&1b                                                          ; 8c9d: a2 1b       ..
     jsr sub_c8d4f                                                     ; 8c9f: 20 4f 8d     O.
     jsr print_message_and_fall_through                                ; 8ca2: 20 3b 85     ;.
-; overlapping: ora l8c0d                                              ; 8ca5: 0d 0d 8c    ...
-    equb &0d, &0d                                                     ; 8ca5: 0d 0d       ..
+    equs &0d, &0d                                                     ; 8ca5: 0d 0d       ..
 
     sty l0f06                                                         ; 8ca7: 8c 06 0f    ...
-; overlapping: asl l000f                                              ; 8ca8: 06 0f       ..
     sty l00b4                                                         ; 8caa: 84 b4       ..
     txa                                                               ; 8cac: 8a          .
     eor #&ff                                                          ; 8cad: 49 ff       I.
@@ -2460,8 +2428,6 @@ l8014 = l800d+7
 ; &8cba referenced 1 time by &8ce5
 .c8cba
     ldy l00b3                                                         ; 8cba: a4 b3       ..
-.sub_c8cbc
-l8cbd = sub_c8cbc+1
     ldx l00b7                                                         ; 8cbc: a6 b7       ..
     stx l0f05                                                         ; 8cbe: 8e 05 0f    ...
     ldx #3                                                            ; 8cc1: a2 03       ..
@@ -6886,7 +6852,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0001
 ;     l0002
 ;     l0003
-;     l000f
 ;     l0010
 ;     l0011
 ;     l0012
@@ -6894,7 +6859,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0014
 ;     l0015
 ;     l0016
-;     l0020
 ;     l0036
 ;     l003a
 ;     l0055
@@ -6902,7 +6866,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0058
 ;     l0059
 ;     l005a
-;     l0063
 ;     l009a
 ;     l009b
 ;     l009c
@@ -7047,11 +7010,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0fdf
 ;     l0fe0
 ;     l212e
-;     l464e
-;     l4db9
-;     l6269
-;     l6c43
-;     l6f4e
 ;     l8001
 ;     l8002
 ;     l8004
@@ -7067,8 +7025,6 @@ l9ed2 = sub_c9ed1+1
 ;     l8530
 ;     l8bd6
 ;     l8bd7
-;     l8c0d
-;     l8cbd
 ;     l8d02
 ;     l8d3a
 ;     l8d4b
@@ -7087,8 +7043,6 @@ l9ed2 = sub_c9ed1+1
 ;     l9c5b
 ;     l9eca
 ;     l9ed2
-;     la00d
-;     lbc28
 ;     loop_c0430
 ;     loop_c048a
 ;     loop_c04d1
@@ -7283,7 +7237,6 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c89d1
 ;     sub_c89d2
 ;     sub_c8bfd
-;     sub_c8cbc
 ;     sub_c8cf7
 ;     sub_c8cfc
 ;     sub_c8d1f

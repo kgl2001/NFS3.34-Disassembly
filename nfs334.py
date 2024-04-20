@@ -2,47 +2,29 @@ from commands import *
 from trace import *
 import acorn
 
-load(0x8000, "nfs-3.34.rom", "6502")
+load(0x8000, "NFS-3.34.rom", "6502")
 move(0x0400, 0x934c, 0x300)
 set_output_filename("nfs334.6502")
 
-comment(0x8000, "*****************************************************")
-comment(0x8000, "If patching for Master 128, set the following:")
-comment(0x8000, "econet_station_id = &2000 (or any address you choose)")
-comment(0x8000, "econet_INTOFF     = &fe38")
-comment(0x8000, "econet_INTON      = &fe3c")
-comment(0x8000, "*****************************************************")
+comment(0x8000, '''*****************************************************
+If patching for Master 128, set the following:
+econet_station_id = &2000 (or any address you choose)
+econet_INTOFF     = &fe38
+econet_INTON      = &fe3c
+*****************************************************''')
 blank(0x8000)
 
 acorn.bbc()
 acorn.is_sideways_rom()
 
-no_automatic_comment(0x81e9)
-comment(0x81e9, "Comment removed")
-no_automatic_comment(0x8208)
-no_automatic_comment(0x820b)
-no_automatic_comment(0x8215)
-no_automatic_comment(0x8218)
-
-
-string(0x81e9,n=None)
-string(0x8208,n=None)
 string(0x8BD7,n=None)
 string(0x8BDA,n=None)
 stringcr(0x8BE5)
 stringcr(0x8BEA)
 string(0x8BEF,n=None)
-string(0x8C23,n=None)
-string(0x8C2D,n=None)
-string(0x8C3B,n=None)
-string(0x8C46,n=None)
 string(0x8CE7,n=None)
-string(0x8C71,n=None)
-string(0x8C84,n=None)
-string(0x8C98,n=None)
+
 byte(0x8015,n=11)
-byte(0x81BF,n=1)
-byte(0x8215,n=2)
 byte(0x824d,n=14)
 byte(0x84BB,n=1)
 byte(0x84C6,n=1)
@@ -51,7 +33,6 @@ byte(0x84DF,n=1)
 byte(0x84E9,n=1)
 byte(0x84F1,n=1)
 byte(0x84FD,n=1)
-byte(0x8CA5,n=2)
 byte(0x918e,n=26)
 for i in range(9):
     byte(0x964c+i*2,n=2)
@@ -64,7 +45,7 @@ label(0xfea0,"econet_adlc_address_0")
 label(0xfea1,"econet_adlc_address_1")
 label(0xfea2,"econet_adlc_address_2")
 label(0xfea3,"econet_adlc_address_3")
-label(0x853b,"print_message_and_fall_through")
+hook_subroutine(0x853b,"print_message_and_fall_through", stringhi_hook)
 
 label(0x9d94,"l9d94")
 expr(0x9d8e, make_lo("l9d94"))
@@ -166,7 +147,6 @@ label(0x9bdd,"l9bdd")
 expr(0x9b9c, make_hi(make_subtract("l9bdd",1)))
 expr(0x9b9f, make_lo(make_subtract("l9bdd",1)))
 
-
 expr(0x82c4, "econet_station_id")
 expr(0x968f, "econet_station_id")
 expr(0x9701, "econet_station_id")
@@ -182,7 +162,6 @@ expr(0x96b5, "econet_INTOFF")
 expr(0x9c54, "econet_INTOFF")
 expr(0x9c57, "econet_INTOFF")
 expr(0x9fcc, "econet_INTOFF")
-
 
 for i in range(36):
     rts_code_ptr(0x8020+1+i, 0x8044+1+i)
@@ -227,23 +206,23 @@ entry(0x9433) #Relocated to 0x4e9. Orphaned code? No caller?
 entry(0x943B) #Relocated to 0x4ef. Orphaned code? No caller?
 entry(0x9468) #Relocated to 0x51d. Orphaned code? No caller?
 
-entry(0x9715) #Link found
-entry(0x9747) #Link found
-entry(0x982D) #Link found
-entry(0x9839) #Link found
-entry(0x984F) #Link found
-entry(0x98F7) #Link found
-entry(0x9992) #Link found
-entry(0x99BB) #Link found
-entry(0x9D4C) #Link found
-entry(0x9D94) #Link found
-entry(0x9DB2) #Link found
-entry(0x9DC8) #Link found
-entry(0x9E2B) #Link found
-entry(0x9E50) #Link found
-entry(0x9EA4) #Link found
-entry(0x9EE9) #Link found
-entry(0x9EFF) #Link found
+entry(0x9715) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9747) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x982D) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9839) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x984F) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x98F7) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9992) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x99BB) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9D4C) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9D94) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9DB2) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9DC8) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9E2B) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9E50) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9EA4) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9EE9) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
+entry(0x9EFF) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
 entry(0x9FCB) #Orphaned code? No caller?
 entry(0x9FD9) #Orphaned code? No caller?
 entry(0x9FEB) #Orphaned code? No caller?
