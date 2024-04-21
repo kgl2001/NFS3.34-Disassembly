@@ -2,6 +2,13 @@ from commands import *
 from trace import *
 import acorn
 
+def mllh(addr, label_name, lo_ref, hi_ref=None): # mllh notionally stands for make_label_lo_hi
+    if hi_ref is None:
+        hi_ref = lo_ref + 2
+    label(addr, label_name)
+    expr(lo_ref, make_lo(label_name))
+    expr(hi_ref, make_hi(label_name))
+
 load(0x8000, "NFS-3.34.rom", "6502")
 move(0x0400, 0x934c, 0x300)
 set_output_filename("nfs334.6502")
@@ -47,101 +54,31 @@ label(0xfea2,"econet_adlc_address_2")
 label(0xfea3,"econet_adlc_address_3")
 hook_subroutine(0x853b,"print_message_and_fall_through", stringhi_hook)
 
-label(0x9d94,"l9d94")
-expr(0x9d8e, make_lo("l9d94"))
-expr(0x9d90, make_hi("l9d94"))
 
-label(0x9db2,"l9db2")
-expr(0x9dac, make_lo("l9db2"))
-expr(0x9dae, make_hi("l9db2"))
-
-label(0x9dc8,"l9dc8")
-expr(0x9dc2, make_lo("l9dc8"))
-expr(0x9dc4, make_hi("l9dc8"))
-
-label(0x9de3,"l9de3")
-expr(0x9dd3, make_lo("l9de3"))
-expr(0x9dd5, make_hi("l9de3"))
-
-label(0x9edd,"l9edd")
-expr(0x9e0a, make_lo("l9edd"))
-expr(0x9e0c, make_hi("l9edd"))
-
-label(0x9e2b,"l9e2b")
-expr(0x9e25, make_lo("l9e2b"))
-expr(0x9e27, make_hi("l9e2b"))
-
-label(0x9e50,"l9e50")
-expr(0x9e43, make_lo("l9e50"))
-expr(0x9e45, make_hi("l9e50"))
-
-label(0x9ea4,"l9ea4")
-expr(0x9e4a, make_lo("l9ea4"))
-expr(0x9e4c, make_hi("l9ea4"))
-
-label(0x9a34,"l9a34")
-expr(0x9e88, make_lo("l9a34"))
-expr(0x9e8a, make_hi("l9a34"))
-
-label(0x9ee9,"l9ee9")
-expr(0x9ee3, make_lo("l9ee9"))
-expr(0x9ee5, make_hi("l9ee9"))
-
-label(0x9eff,"l9eff")
-expr(0x9ef9, make_lo("l9eff"))
-expr(0x9efb, make_hi("l9eff"))
-
-label(0x9f15,"l9f15")
-expr(0x9f0a, make_lo("l9f15"))
-expr(0x9f0c, make_hi("l9f15"))
-
-label(0x9d4c,"l9d4c")
-expr(0x9cab, make_lo("l9d4c"))
-expr(0x9cad, make_hi("l9d4c"))
-
-label(0x96f6,"l96f6")
-expr(0x9a44, make_lo("l96f6"))
-expr(0x9a46, make_hi("l96f6"))
-
-label(0x9715,"l9715")
-expr(0x970f, make_lo("l9715"))
-expr(0x9711, make_hi("l9715"))
-
-label(0x9747,"l9747")
-expr(0x9731, make_lo("l9747"))
-expr(0x9733, make_hi("l9747"))
-
-label(0x982d,"l982d")
-expr(0x9827, make_lo("l982d"))
-expr(0x9829, make_hi("l982d"))
-
-label(0x9839,"l9839")
-expr(0x9833, make_lo("l9839"))
-expr(0x9835, make_hi("l9839"))
-
-label(0x984f,"l984f")
-expr(0x9849, make_lo("l984f"))
-expr(0x984b, make_hi("l984f"))
-
-label(0x9865,"l9865")
-expr(0x985a, make_lo("l9865"))
-expr(0x985c, make_hi("l9865"))
-
-label(0x989a,"l989a")
-expr(0x9878, make_lo("l989a"))
-expr(0x987a, make_hi("l989a"))
-
-label(0x98f7,"l98f7")
-expr(0x9884, make_lo("l98f7"))
-expr(0x9886, make_hi("l98f7"))
-
-label(0x99bb,"l99bb")
-expr(0x9971, make_lo("l99bb"))
-expr(0x9973, make_hi("l99bb"))
-
-label(0x9992,"l9992")
-expr(0x998c, make_lo("l9992"))
-expr(0x998e, make_hi("l9992"))
+mllh(0x9d94, "l9d94", 0x9d8e)
+mllh(0x9db2, "l9db2", 0x9dac)
+mllh(0x9dc8, "l9dc8", 0x9dc2)
+mllh(0x9de3, "l9de3", 0x9dd3)
+mllh(0x9edd, "l9edd", 0x9e0a)
+mllh(0x9e2b, "l9e2b", 0x9e25)
+mllh(0x9e50, "l9e50", 0x9e43)
+mllh(0x9ea4, "l9ea4", 0x9e4a)
+mllh(0x9a34, "l9a34", 0x9e88)
+mllh(0x9ee9, "l9ee9", 0x9ee3)
+mllh(0x9eff, "l9eff", 0x9ef9)
+mllh(0x9f15, "l9f15", 0x9f0a)
+mllh(0x9d4c, "l9d4c", 0x9cab)
+mllh(0x96f6, "l96f6", 0x9a44)
+mllh(0x9715, "l9715", 0x970f)
+mllh(0x9747, "l9747", 0x9731)
+mllh(0x982d, "l982d", 0x9827)
+mllh(0x9839, "l9839", 0x9833)
+mllh(0x984f, "l984f", 0x9849)
+mllh(0x9865, "l9865", 0x985a)
+mllh(0x989a, "l989a", 0x9878)
+mllh(0x98f7, "l98f7", 0x9884)
+mllh(0x99bb, "l99bb", 0x9971)
+mllh(0x9992, "l9992", 0x998c)
 
 label(0x9bdd,"l9bdd")
 expr(0x9b9c, make_hi(make_subtract("l9bdd",1)))
@@ -183,20 +120,9 @@ for i in range(9):
 for i in range(14):
     code_ptr(0x0500+2*i)
 
-entry(0x81F8) #RTS to here via stack manipulation
-entry(0x8211) #RTS to here via stack manipulation
-entry(0x8217) #RTS to here via stack manipulation
 entry(0x8694) #Orphaned code? No caller?
 entry(0x89EA) #Orphaned code? No caller?
 entry(0x8BF2) #Orphaned code? No caller?
-entry(0x8C24) #RTS to here via stack manipulation
-entry(0x8C2E) #RTS to here via stack manipulation
-entry(0x8C41) #RTS to here via stack manipulation
-entry(0x8C67) #RTS to here via stack manipulation
-entry(0x8C73) #RTS to here via stack manipulation
-entry(0x8C8B) #RTS to here via stack manipulation
-entry(0x8C9D) #RTS to here via stack manipulation
-entry(0x8CA7) #RTS to here via stack manipulation
 entry(0x8D06) #Orphaned code? No caller?
 entry(0x9007) #Orphaned code? No caller?
 entry(0x9307) #Relocated to &16. Orphaned code? No caller?
