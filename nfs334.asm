@@ -103,14 +103,7 @@ l0350                   = &0350
 l0351                   = &0351
 l0355                   = &0355
 l0cff                   = &0cff
-l0d07                   = &0d07
-l0d0c                   = &0d0c
-l0d0d                   = &0d0d
-l0d0e                   = &0d0e
-l0d14                   = &0d14
-l0d1a                   = &0d1a
-l0d1e                   = &0d1e
-l0d20                   = &0d20
+sub_c0d00               = &0d00
 l0d21                   = &0d21
 l0d22                   = &0d22
 l0d23                   = &0d23
@@ -191,6 +184,7 @@ l0fe0                   = &0fe0
 l212e                   = &212e
 l944c                   = &944c
 c954c                   = &954c
+sub_c9fcb               = &9fcb
 econet_INTOFF           = &fe18
 econet_station_id       = &fe18
 econet_INTON            = &fe20
@@ -230,13 +224,14 @@ oscli                   = &fff7
 
     org &8000
 
-; *****************************************************
+; 
+; **************************************************************
 ; If patching for Master 128, set the following:
 ; econet_station_id = &2000 (or any address you choose)
 ; econet_INTOFF     = &fe38
 ; econet_INTON      = &fe3c
-; *****************************************************
-
+; **************************************************************
+; 
 ; Sideways ROM header
 ; &8000 referenced 2 times by &048b, &9bb8
 .rom_header
@@ -617,7 +612,7 @@ l8014 = l800d+7
 
 ; &8217 referenced 1 time by &8199
 .c8217
-    ldy #&0d                                                          ; 8217: a0 0d       ..
+    ldy #(l825b - l824d) - 1                                          ; 8217: a0 0d       ..
 ; &8219 referenced 1 time by &8220
 .loop_c8219
     lda l824d,y                                                       ; 8219: b9 4d 82    .M.
@@ -625,7 +620,7 @@ l8014 = l800d+7
     dey                                                               ; 821f: 88          .
     bpl loop_c8219                                                    ; 8220: 10 f7       ..
     jsr sub_c82d1                                                     ; 8222: 20 d1 82     ..
-    ldy #&1b                                                          ; 8225: a0 1b       ..
+    ldy #l825b - c8240                                                ; 8225: a0 1b       ..
     ldx #7                                                            ; 8227: a2 07       ..
     jsr c82e5                                                         ; 8229: 20 e5 82     ..
     stx l00ce                                                         ; 822c: 86 ce       ..
@@ -684,7 +679,8 @@ l8014 = l800d+7
 .c8275
     rts                                                               ; 8275: 60          `
 
-    equb   7, &90                                                     ; 8276: 07 90       ..
+.l8276
+    equw sub_c9007                                                    ; 8276: 07 90       ..
 
 .sub_c8278
     sty l009d                                                         ; 8278: 84 9d       ..
@@ -740,7 +736,7 @@ l8014 = l800d+7
     jsr osbyte                                                        ; 82d7: 20 f4 ff     ..            ; Read address of ROM pointer table
     stx osrdsc_ptr                                                    ; 82da: 86 f6       ..             ; X=value of address of ROM pointer table (low byte)
     sty l00f7                                                         ; 82dc: 84 f7       ..             ; Y=value of address of ROM pointer table (high byte)
-    ldy #&36 ; '6'                                                    ; 82de: a0 36       .6
+    ldy #l8276 - c8240                                                ; 82de: a0 36       .6
     sty netv                                                          ; 82e0: 8c 24 02    .$.
     ldx #1                                                            ; 82e3: a2 01       ..
 ; &82e5 referenced 2 times by &8229, &82f7
@@ -820,6 +816,7 @@ l8014 = l800d+7
 .sub_c8346
     clv                                                               ; 8346: b8          .
     bvc c8359                                                         ; 8347: 50 10       P.
+.sub_c8349
     lda #osbyte_close_spool_exec                                      ; 8349: a9 77       .w
     jsr osbyte                                                        ; 834b: 20 f4 ff     ..            ; Close any *SPOOL and *EXEC files
     ldy #&17                                                          ; 834e: a0 17       ..
@@ -2343,18 +2340,24 @@ l8014 = l800d+7
 ; &8bd7 referenced 1 time by &8bb9
 .l8bd7
     equs "."                                                          ; 8bd7: 2e          .
-    equb &80, &78                                                     ; 8bd8: 80 78       .x
+    equb >(c8079-1)                                                   ; 8bd8: 80          .
+    equb <(c8079-1)                                                   ; 8bd9: 78          x
     equs "I AM"                                                       ; 8bda: 49 20 41... I A
-    equb &8d,   5                                                     ; 8bde: 8d 05       ..
+    equb >(sub_c8d06-1)                                               ; 8bde: 8d          .
+    equb <(sub_c8d06-1)                                               ; 8bdf: 05          .
     equs "EX "                                                        ; 8be0: 45 58 20    EX
-    equb &8b, &f1                                                     ; 8be3: 8b f1       ..
+    equb >(sub_c8bf2-1)                                               ; 8be3: 8b          .
+    equb <(sub_c8bf2-1)                                               ; 8be4: f1          .
     equs "EX", &0d                                                    ; 8be5: 45 58 0d    EX.
-    equb &8b, &f1                                                     ; 8be8: 8b f1       ..
+    equb >(sub_c8bf2-1)                                               ; 8be8: 8b          .
+    equb <(sub_c8bf2-1)                                               ; 8be9: f1          .
     equs "BYE", &0d                                                   ; 8bea: 42 59 45... BYE
-    equb &83                                                          ; 8bee: 83          .
-    equs "H"                                                          ; 8bef: 48          H
-    equb &80, &78                                                     ; 8bf0: 80 78       .x
+    equb >(sub_c8349-1)                                               ; 8bee: 83          .
+    equb <(sub_c8349-1)                                               ; 8bef: 48          H
+    equb >(c8079-1)                                                   ; 8bf0: 80          .
+    equb <(c8079-1)                                                   ; 8bf1: 78          x
 
+.sub_c8bf2
     dey                                                               ; 8bf2: 88          .
     ldx #1                                                            ; 8bf3: a2 01       ..
     stx l00b7                                                         ; 8bf5: 86 b7       ..
@@ -2495,6 +2498,7 @@ l8014 = l800d+7
 .l8d02
     equb &f6, &e7, &e9, &ef                                           ; 8d02: f6 e7 e9... ...
 
+.sub_c8d06
     jsr c8555                                                         ; 8d06: 20 55 85     U.
     bcs c8d1c                                                         ; 8d09: b0 11       ..
     lda #0                                                            ; 8d0b: a9 00       ..
@@ -3046,6 +3050,7 @@ l8014 = l800d+7
 .c9004
     jmp c8f48                                                         ; 9004: 4c 48 8f    LH.
 
+.sub_c9007
     php                                                               ; 9007: 08          .
     pha                                                               ; 9008: 48          H
     txa                                                               ; 9009: 8a          .
@@ -3614,6 +3619,14 @@ l8014 = l800d+7
 .c934c
 
     org &0400
+; 
+; **************************************************************
+; Tube handler code
+; -----------------
+; &300 bytes of code between &934c and &964b are copied to &0400
+; The code that does this copy starts at &80f7
+; **************************************************************
+; 
 ; &934c referenced 2 times by &80f9, &80fc
 .c0400
     jmp c0473                                                         ; 934c: 4c 73 04    Ls. :0400[1]
@@ -4242,7 +4255,7 @@ l8014 = l800d+7
     sta econet_adlc_address_1                                         ; 96f2: 8d a1 fe    ...
     rts                                                               ; 96f5: 60          `
 
-; &96f6 referenced 1 time by &9fd6
+; &96f6 referenced 1 time by &0d0b
 .l96f6
     lda #1                                                            ; 96f6: a9 01       ..
     bit econet_adlc_address_1                                         ; 96f8: 2c a1 fe    ,..
@@ -4258,7 +4271,7 @@ l8014 = l800d+7
 .c970e
     lda #<l9715                                                       ; 970e: a9 15       ..
     ldy #>l9715                                                       ; 9710: a0 97       ..
-    jmp l0d0e                                                         ; 9712: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9712: 4c 0e 0d    L..
 
 .l9715
     bit econet_adlc_address_1                                         ; 9715: 2c a1 fe    ,..
@@ -4281,7 +4294,7 @@ l8014 = l800d+7
     sta l00a2                                                         ; 972e: 85 a2       ..
     lda #<l9747                                                       ; 9730: a9 47       .G
     ldy #>l9747                                                       ; 9732: a0 97       ..
-    jmp l0d0e                                                         ; 9734: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9734: 4c 0e 0d    L..
 
 ; &9737 referenced 5 times by &96fb, &9718, &974c, &9780, &9782
 .c9737
@@ -4317,7 +4330,7 @@ l8014 = l800d+7
     sty l00a2                                                         ; 9767: 84 a2       ..
     lda econet_adlc_address_1                                         ; 9769: ad a1 fe    ...
     bne c974c                                                         ; 976c: d0 de       ..
-    jmp l0d14                                                         ; 976e: 4c 14 0d    L..
+    jmp c0d14                                                         ; 976e: 4c 14 0d    L..
 
 ; &9771 referenced 2 times by &975a, &9765
 .c9771
@@ -4443,7 +4456,7 @@ l8014 = l800d+7
     sta econet_adlc_address_0                                         ; 982f: 8d a0 fe    ...
     lda #<l9839                                                       ; 9832: a9 39       .9
     ldy #>l9839                                                       ; 9834: a0 98       ..
-    jmp l0d0e                                                         ; 9836: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9836: 4c 0e 0d    L..
 
 .l9839
     lda #1                                                            ; 9839: a9 01       ..
@@ -4454,7 +4467,7 @@ l8014 = l800d+7
     bne c988a                                                         ; 9846: d0 42       .B
     lda #<l984f                                                       ; 9848: a9 4f       .O
     ldy #>l984f                                                       ; 984a: a0 98       ..
-    jmp l0d0e                                                         ; 984c: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 984c: 4c 0e 0d    L..
 
 .l984f
     bit econet_adlc_address_1                                         ; 984f: 2c a1 fe    ,..
@@ -4465,7 +4478,7 @@ l8014 = l800d+7
     ldy #>l9865                                                       ; 985b: a0 98       ..
     bit econet_adlc_address_0                                         ; 985d: 2c a0 fe    ,..
     bmi l9865                                                         ; 9860: 30 03       0.
-    jmp l0d0e                                                         ; 9862: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9862: 4c 0e 0d    L..
 
 ; &9865 referenced 1 time by &9860
 .l9865
@@ -4482,13 +4495,13 @@ l8014 = l800d+7
     ldy #>l989a                                                       ; 9879: a0 98       ..
     bit econet_adlc_address_0                                         ; 987b: 2c a0 fe    ,..
     bmi l989a                                                         ; 987e: 30 1a       0.
-    jmp l0d0e                                                         ; 9880: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9880: 4c 0e 0d    L..
 
 ; &9883 referenced 1 time by &9875
 .c9883
     lda #<l98f7                                                       ; 9883: a9 f7       ..
     ldy #>l98f7                                                       ; 9885: a0 98       ..
-    jmp l0d0e                                                         ; 9887: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9887: 4c 0e 0d    L..
 
 ; &988a referenced 12 times by &9797, &983e, &9846, &9852, &9857, &9868, &98ad, &98df, &98e5, &9930, &99b8, &9a8c
 .c988a
@@ -4535,7 +4548,7 @@ l8014 = l800d+7
 .c98c6
     lda econet_adlc_address_1                                         ; 98c6: ad a1 fe    ...
     bne c989f                                                         ; 98c9: d0 d4       ..
-    jmp l0d14                                                         ; 98cb: 4c 14 0d    L..
+    jmp c0d14                                                         ; 98cb: 4c 14 0d    L..
 
 ; &98ce referenced 3 times by &989f, &98b4, &98c4
 .c98ce
@@ -4591,7 +4604,7 @@ l8014 = l800d+7
 .c9928
     lda econet_adlc_address_1                                         ; 9928: ad a1 fe    ...
     bne c98fa                                                         ; 992b: d0 cd       ..
-    jmp l0d14                                                         ; 992d: 4c 14 0d    L..
+    jmp c0d14                                                         ; 992d: 4c 14 0d    L..
 
 ; &9930 referenced 3 times by &9910, &9942, &994e
 .c9930
@@ -4643,7 +4656,7 @@ l8014 = l800d+7
     sta econet_adlc_address_2                                         ; 9988: 8d a2 fe    ...
     lda #<l9992                                                       ; 998b: a9 92       ..
     ldy #>l9992                                                       ; 998d: a0 99       ..
-    jmp l0d0e                                                         ; 998f: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 998f: 4c 0e 0d    L..
 
 .l9992
     lda econet_station_id                                             ; 9992: ad 18 fe    ...
@@ -4658,7 +4671,7 @@ l8014 = l800d+7
     sta econet_adlc_address_1                                         ; 99a9: 8d a1 fe    ...
     lda l0d4b                                                         ; 99ac: ad 4b 0d    .K.
     ldy l0d4c                                                         ; 99af: ac 4c 0d    .L.
-    jmp l0d0e                                                         ; 99b2: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 99b2: 4c 0e 0d    L..
 
 ; &99b5 referenced 1 time by &99a5
 .c99b5
@@ -4765,7 +4778,7 @@ l9a16 = sub_c9a15+1
 .c9a43
     lda #<l96f6                                                       ; 9a43: a9 f6       ..
     ldy #>l96f6                                                       ; 9a45: a0 96       ..
-    jmp l0d0e                                                         ; 9a47: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9a47: 4c 0e 0d    L..
 
 ; &9a4a referenced 1 time by &97f8
 .c9a4a
@@ -5087,7 +5100,7 @@ l9b13 = c9b12+1
 ; &9c2d referenced 1 time by &9c35
 .loop_c9c2d
     lda (l00a0),y                                                     ; 9c2d: b1 a0       ..
-    sta l0d1a,y                                                       ; 9c2f: 99 1a 0d    ...
+    sta c0d1a,y                                                       ; 9c2f: 99 1a 0d    ...
     iny                                                               ; 9c32: c8          .
     cpy #&10                                                          ; 9c33: c0 10       ..
     bcc loop_c9c2d                                                    ; 9c35: 90 f6       ..
@@ -5293,7 +5306,7 @@ l9c5b = sub_c9c59+2
     bcs c9d88                                                         ; 9d68: b0 1e       ..
     bit econet_adlc_address_0                                         ; 9d6a: 2c a0 fe    ,..
     bmi loop_c9d52                                                    ; 9d6d: 30 e3       0.
-    jmp l0d14                                                         ; 9d6f: 4c 14 0d    L..
+    jmp c0d14                                                         ; 9d6f: 4c 14 0d    L..
 
 ; &9d72 referenced 1 time by &9db7
 .c9d72
@@ -5321,7 +5334,7 @@ l9c5b = sub_c9c59+2
     sta econet_adlc_address_1                                         ; 9d8a: 8d a1 fe    ...
     lda #<l9d94                                                       ; 9d8d: a9 94       ..
     ldy #>l9d94                                                       ; 9d8f: a0 9d       ..
-    jmp l0d0e                                                         ; 9d91: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9d91: 4c 0e 0d    L..
 
 .l9d94
     lda #&82                                                          ; 9d94: a9 82       ..
@@ -5341,7 +5354,7 @@ l9c5b = sub_c9c59+2
 .c9dab
     lda #<l9db2                                                       ; 9dab: a9 b2       ..
     ldy #>l9db2                                                       ; 9dad: a0 9d       ..
-    jmp l0d0e                                                         ; 9daf: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9daf: 4c 0e 0d    L..
 
 .l9db2
     lda #1                                                            ; 9db2: a9 01       ..
@@ -5352,7 +5365,7 @@ l9c5b = sub_c9c59+2
     bne c9dde                                                         ; 9dbf: d0 1d       ..
     lda #<l9dc8                                                       ; 9dc1: a9 c8       ..
     ldy #>l9dc8                                                       ; 9dc3: a0 9d       ..
-    jmp l0d0e                                                         ; 9dc5: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9dc5: 4c 0e 0d    L..
 
 .l9dc8
     bit econet_adlc_address_1                                         ; 9dc8: 2c a1 fe    ,..
@@ -5363,7 +5376,7 @@ l9c5b = sub_c9c59+2
     ldy #>l9de3                                                       ; 9dd4: a0 9d       ..
     bit econet_adlc_address_0                                         ; 9dd6: 2c a0 fe    ,..
     bmi l9de3                                                         ; 9dd9: 30 08       0.
-    jmp l0d0e                                                         ; 9ddb: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9ddb: 4c 0e 0d    L..
 
 ; &9dde referenced 7 times by &9dbf, &9dcb, &9dd0, &9de6, &9dee, &9df6, &9dfd
 .c9dde
@@ -5399,7 +5412,7 @@ l9c5b = sub_c9c59+2
     sta econet_adlc_address_2                                         ; 9e21: 8d a2 fe    ...
     lda #<l9e2b                                                       ; 9e24: a9 2b       .+
     ldy #>l9e2b                                                       ; 9e26: a0 9e       ..
-    jmp l0d0e                                                         ; 9e28: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9e28: 4c 0e 0d    L..
 
 .l9e2b
     lda econet_station_id                                             ; 9e2b: ad 18 fe    ...
@@ -5415,13 +5428,13 @@ l9c5b = sub_c9c59+2
     bne c9e49                                                         ; 9e40: d0 07       ..
     lda #<l9e50                                                       ; 9e42: a9 50       .P
     ldy #>l9e50                                                       ; 9e44: a0 9e       ..
-    jmp l0d0e                                                         ; 9e46: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9e46: 4c 0e 0d    L..
 
 ; &9e49 referenced 1 time by &9e40
 .c9e49
     lda #<l9ea4                                                       ; 9e49: a9 a4       ..
     ldy #>l9ea4                                                       ; 9e4b: a0 9e       ..
-    jmp l0d0e                                                         ; 9e4d: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9e4d: 4c 0e 0d    L..
 
 .l9e50
     ldy l00a2                                                         ; 9e50: a4 a2       ..
@@ -5450,7 +5463,7 @@ l9c5b = sub_c9c59+2
 .c9e75
     bit econet_adlc_address_0                                         ; 9e75: 2c a0 fe    ,..
     bmi c9e55                                                         ; 9e78: 30 db       0.
-    jmp l0d14                                                         ; 9e7a: 4c 14 0d    L..
+    jmp c0d14                                                         ; 9e7a: 4c 14 0d    L..
 
 ; &9e7d referenced 4 times by &9e61, &9e71, &9ebd, &9ed3
 .c9e7d
@@ -5460,7 +5473,7 @@ l9c5b = sub_c9c59+2
     bpl c9e9b                                                         ; 9e85: 10 14       ..
     lda #<l9a34                                                       ; 9e87: a9 34       .4
     ldy #>l9a34                                                       ; 9e89: a0 9a       ..
-    jmp l0d0e                                                         ; 9e8b: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9e8b: 4c 0e 0d    L..
 
 ; &9e8e referenced 4 times by &9e19, &9e31, &9e55, &9ea7
 .c9e8e
@@ -5477,7 +5490,7 @@ l9c5b = sub_c9c59+2
 .c9e9b
     lda l0d4b                                                         ; 9e9b: ad 4b 0d    .K.
     ldy l0d4c                                                         ; 9e9e: ac 4c 0d    .L.
-    jmp l0d0e                                                         ; 9ea1: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9ea1: 4c 0e 0d    L..
 
 .l9ea4
     bit econet_adlc_address_0                                         ; 9ea4: 2c a0 fe    ,..
@@ -5516,7 +5529,7 @@ l9ed2 = sub_c9ed1+1
 .c9ed5
     bit econet_adlc_address_0                                         ; 9ed5: 2c a0 fe    ,..
     bmi c9ea7                                                         ; 9ed8: 30 cd       0.
-    jmp l0d14                                                         ; 9eda: 4c 14 0d    L..
+    jmp c0d14                                                         ; 9eda: 4c 14 0d    L..
 
 ; &9edd referenced 1 time by &9da8
 .l9edd
@@ -5524,7 +5537,7 @@ l9ed2 = sub_c9ed1+1
     sta econet_adlc_address_0                                         ; 9edf: 8d a0 fe    ...
     lda #<l9ee9                                                       ; 9ee2: a9 e9       ..
     ldy #>l9ee9                                                       ; 9ee4: a0 9e       ..
-    jmp l0d0e                                                         ; 9ee6: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9ee6: 4c 0e 0d    L..
 
 .l9ee9
     lda #1                                                            ; 9ee9: a9 01       ..
@@ -5535,7 +5548,7 @@ l9ed2 = sub_c9ed1+1
     bne c9f3d                                                         ; 9ef6: d0 45       .E
     lda #<l9eff                                                       ; 9ef8: a9 ff       ..
     ldy #>l9eff                                                       ; 9efa: a0 9e       ..
-    jmp l0d0e                                                         ; 9efc: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9efc: 4c 0e 0d    L..
 
 .l9eff
     bit econet_adlc_address_1                                         ; 9eff: 2c a1 fe    ,..
@@ -5546,7 +5559,7 @@ l9ed2 = sub_c9ed1+1
     ldy #>l9f15                                                       ; 9f0b: a0 9f       ..
     bit econet_adlc_address_0                                         ; 9f0d: 2c a0 fe    ,..
     bmi l9f15                                                         ; 9f10: 30 03       0.
-    jmp l0d0e                                                         ; 9f12: 4c 0e 0d    L..
+    jmp c0d0e                                                         ; 9f12: 4c 0e 0d    L..
 
 ; &9f15 referenced 1 time by &9f10
 .l9f15
@@ -5662,23 +5675,55 @@ l9ed2 = sub_c9ed1+1
 .c9fca
     rts                                                               ; 9fca: 60          `
 
-    bit econet_INTOFF                                                 ; 9fcb: 2c 18 fe    ,..
-    pha                                                               ; 9fce: 48          H
-    tya                                                               ; 9fcf: 98          .
-    pha                                                               ; 9fd0: 48          H
-    lda #0                                                            ; 9fd1: a9 00       ..
-    sta romsel                                                        ; 9fd3: 8d 30 fe    .0.
-    jmp l96f6                                                         ; 9fd6: 4c f6 96    L..
 
-    sty l0d0d                                                         ; 9fd9: 8c 0d 0d    ...
-    sta l0d0c                                                         ; 9fdc: 8d 0c 0d    ...
-    lda romsel_copy                                                   ; 9fdf: a5 f4       ..
-    sta romsel                                                        ; 9fe1: 8d 30 fe    .0.
-    pla                                                               ; 9fe4: 68          h
-    tay                                                               ; 9fe5: a8          .
-    pla                                                               ; 9fe6: 68          h
-    bit econet_INTON                                                  ; 9fe7: 2c 20 fe    , .
-    rti                                                               ; 9fea: 40          @
+    org &0d00
+; 
+; **************************************************************
+; &20 bytes of code between &9fcb and &9fea are copied to &0d00
+; The code that does this copy starts at &96cf
+; 
+; Note the self modifying code at the &d0b JMP (changed by &d0e)
+; **************************************************************
+; 
+    bit econet_INTOFF                                                 ; 9fcb: 2c 18 fe    ,.. :0d00[2]
+    pha                                                               ; 9fce: 48          H   :0d03[2]
+    tya                                                               ; 9fcf: 98          .   :0d04[2]
+    pha                                                               ; 9fd0: 48          H   :0d05[2]
+.sub_c0d06
+l0d07 = sub_c0d06+1
+    lda #0                                                            ; 9fd1: a9 00       ..  :0d06[2]
+; &9fd2 referenced 1 time by &9686
+    sta romsel                                                        ; 9fd3: 8d 30 fe    .0. :0d08[2]
+.sub_c0d0b
+l0d0c = sub_c0d0b+1
+l0d0d = sub_c0d0b+2
+    jmp l96f6                                                         ; 9fd6: 4c f6 96    L.. :0d0b[2]
+
+; &9fd7 referenced 2 times by &0d11, &9cae
+; &9fd8 referenced 2 times by &0d0e, &9cb1
+; &9fd9 referenced 22 times by &9712, &9734, &9836, &984c, &9862, &9880, &9887, &998f, &99b2, &9a47, &9d91, &9daf, &9dc5, &9ddb, &9e28, &9e46, &9e4d, &9e8b, &9ea1, &9ee6, &9efc, &9f12
+.c0d0e
+    sty l0d0d                                                         ; 9fd9: 8c 0d 0d    ... :0d0e[2]
+    sta l0d0c                                                         ; 9fdc: 8d 0c 0d    ... :0d11[2]
+; &9fdf referenced 6 times by &976e, &98cb, &992d, &9d6f, &9e7a, &9eda
+.c0d14
+    lda romsel_copy                                                   ; 9fdf: a5 f4       ..  :0d14[2]
+    sta romsel                                                        ; 9fe1: 8d 30 fe    .0. :0d16[2]
+    pla                                                               ; 9fe4: 68          h   :0d19[2]
+; &9fe5 referenced 1 time by &9c2f
+.c0d1a
+    tay                                                               ; 9fe5: a8          .   :0d1a[2]
+    pla                                                               ; 9fe6: 68          h   :0d1b[2]
+.sub_c0d1c
+l0d1e = sub_c0d1c+2
+    bit econet_INTON                                                  ; 9fe7: 2c 20 fe    , . :0d1c[2]
+; &9fe9 referenced 2 times by &9cf5, &9cfb
+    rti                                                               ; 9fea: 40          @   :0d1f[2]
+
+.l0d20
+    org sub_c9fcb + (l0d20 - sub_c0d00)
+    copyblock sub_c0d00, l0d20, sub_c9fcb
+    clear sub_c0d00, l0d20
 
     lda l0d4a                                                         ; 9feb: ad 4a 0d    .J.
     ora #2                                                            ; 9fee: 09 02       ..
@@ -5709,8 +5754,8 @@ l9ed2 = sub_c9ed1+1
 ;     l00a6:                           24
 ;     l009a:                           23
 ;     l00b2:                           23
-;     l0d0e:                           22
 ;     c9443:                           22
+;     c9fd9:                           22
 ;     osbyte:                          22
 ;     l00be:                           21
 ;     l00a2:                           20
@@ -5757,7 +5802,6 @@ l9ed2 = sub_c9ed1+1
 ;     l009d:                            6
 ;     l00a7:                            6
 ;     l00b1:                            6
-;     l0d14:                            6
 ;     l0d3a:                            6
 ;     l0d52:                            6
 ;     l0d5c:                            6
@@ -5766,6 +5810,7 @@ l9ed2 = sub_c9ed1+1
 ;     c80ae:                            6
 ;     sub_c8508:                        6
 ;     c8f48:                            6
+;     c9fdf:                            6
 ;     osasci:                           6
 ;     l0001:                            5
 ;     l0011:                            5
@@ -5884,9 +5929,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0103:                            2
 ;     l0130:                            2
 ;     l0700:                            2
-;     l0d0c:                            2
-;     l0d0d:                            2
-;     l0d1e:                            2
 ;     l0d22:                            2
 ;     l0d24:                            2
 ;     l0d25:                            2
@@ -5999,6 +6041,9 @@ l9ed2 = sub_c9ed1+1
 ;     c9c96:                            2
 ;     c9f39:                            2
 ;     c9fa7:                            2
+;     l9fd7:                            2
+;     l9fd8:                            2
+;     l9fe9:                            2
 ;     romsel:                           2
 ;     system_via_sr:                    2
 ;     system_via_ifr:                   2
@@ -6032,8 +6077,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0351:                            1
 ;     l0355:                            1
 ;     l0cff:                            1
-;     l0d07:                            1
-;     l0d1a:                            1
 ;     l0d23:                            1
 ;     l0d26:                            1
 ;     l0d41:                            1
@@ -6471,6 +6514,8 @@ l9ed2 = sub_c9ed1+1
 ;     loop_c9f77:                       1
 ;     c9fa4:                            1
 ;     c9fca:                            1
+;     l9fd2:                            1
+;     c9fe5:                            1
 ;     econet_adlc_address_3:            1
 ;     tube_host_r3_status:              1
 ;     tube_host_r4_data:                1
@@ -6520,6 +6565,9 @@ l9ed2 = sub_c9ed1+1
 ;     c06d9
 ;     c06e2
 ;     c06f7
+;     c0d0e
+;     c0d14
+;     c0d1a
 ;     c8079
 ;     c809f
 ;     c80ae
@@ -6878,6 +6926,9 @@ l9ed2 = sub_c9ed1+1
 ;     c9fa4
 ;     c9fa7
 ;     c9fca
+;     c9fd9
+;     c9fdf
+;     c9fe5
 ;     l0000
 ;     l0001
 ;     l0002
@@ -6957,9 +7008,6 @@ l9ed2 = sub_c9ed1+1
 ;     l0d07
 ;     l0d0c
 ;     l0d0d
-;     l0d0e
-;     l0d14
-;     l0d1a
 ;     l0d1e
 ;     l0d20
 ;     l0d21
@@ -7073,6 +7121,10 @@ l9ed2 = sub_c9ed1+1
 ;     l9c5b
 ;     l9eca
 ;     l9ed2
+;     l9fd2
+;     l9fd7
+;     l9fd8
+;     l9fe9
 ;     loop_c0430
 ;     loop_c048a
 ;     loop_c04d1
@@ -7203,6 +7255,10 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c063b
 ;     sub_c065d
 ;     sub_c06a3
+;     sub_c0d00
+;     sub_c0d06
+;     sub_c0d0b
+;     sub_c0d1c
 ;     sub_c8069
 ;     sub_c808c
 ;     sub_c815c
@@ -7220,6 +7276,7 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c831c
 ;     sub_c8340
 ;     sub_c8346
+;     sub_c8349
 ;     sub_c8350
 ;     sub_c8351
 ;     sub_c836a
@@ -7273,9 +7330,11 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c89d1
 ;     sub_c89d2
 ;     sub_c89ea
+;     sub_c8bf2
 ;     sub_c8bfd
 ;     sub_c8cf7
 ;     sub_c8cfc
+;     sub_c8d06
 ;     sub_c8d1f
 ;     sub_c8d20
 ;     sub_c8d4f
@@ -7296,6 +7355,7 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c8f57
 ;     sub_c8f68
 ;     sub_c8f72
+;     sub_c9007
 ;     sub_c9020
 ;     sub_c903d
 ;     sub_c904b
@@ -7348,6 +7408,9 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c9ec9
 ;     sub_c9ed1
 ;     sub_c9f5b
+;     sub_c9fcb
+    assert (l825b - l824d) - 1 == &0d
+    assert <(c8079-1) == &78
     assert <(c8145-1) == &44
     assert <(c8b92-1) == &91
     assert <(c9d45-1) == &44
@@ -7361,12 +7424,15 @@ l9ed2 = sub_c9ed1+1
     assert <(sub_c826f-1) == &6e
     assert <(sub_c8278-1) == &77
     assert <(sub_c82fd-1) == &fc
+    assert <(sub_c8349-1) == &48
     assert <(sub_c85da-1) == &d9
     assert <(sub_c881f-1) == &1e
     assert <(sub_c89a1-1) == &a0
+    assert <(sub_c8bf2-1) == &f1
     assert <(sub_c8bfd-1) == &fc
     assert <(sub_c8cf7-1) == &f6
     assert <(sub_c8cfc-1) == &fb
+    assert <(sub_c8d06-1) == &05
     assert <(sub_c8d1f-1) == &1e
     assert <(sub_c8d20-1) == &1f
     assert <(sub_c8d73-1) == &72
@@ -7432,6 +7498,7 @@ l9ed2 = sub_c9ed1+1
     assert <l9ee9 == &e9
     assert <l9eff == &ff
     assert <l9f15 == &15
+    assert >(c8079-1) == &80
     assert >(c8145-1) == &81
     assert >(c8b92-1) == &8b
     assert >(c9d45-1) == &9d
@@ -7445,12 +7512,15 @@ l9ed2 = sub_c9ed1+1
     assert >(sub_c826f-1) == &82
     assert >(sub_c8278-1) == &82
     assert >(sub_c82fd-1) == &82
+    assert >(sub_c8349-1) == &83
     assert >(sub_c85da-1) == &85
     assert >(sub_c881f-1) == &88
     assert >(sub_c89a1-1) == &89
+    assert >(sub_c8bf2-1) == &8b
     assert >(sub_c8bfd-1) == &8b
     assert >(sub_c8cf7-1) == &8c
     assert >(sub_c8cfc-1) == &8c
+    assert >(sub_c8d06-1) == &8d
     assert >(sub_c8d1f-1) == &8d
     assert >(sub_c8d20-1) == &8d
     assert >(sub_c8d73-1) == &8d
@@ -7528,6 +7598,7 @@ l9ed2 = sub_c9ed1+1
     assert l8267 - c8240 == &27
     assert l826a - c8240 == &2a
     assert l826d - c8240 == &2d
+    assert l8276 - c8240 == &36
     assert osbyte_close_spool_exec == &77
     assert osbyte_explode_chars == &14
     assert osbyte_insert_input_buffer == &99
@@ -7565,5 +7636,6 @@ l9ed2 = sub_c9ed1+1
     assert sub_c88e1 == &88e1
     assert sub_c8949 == &8949
     assert sub_c89ea == &89ea
+    assert sub_c9007 == &9007
 
 save "nfs334.6502", pydis_start, pydis_end
