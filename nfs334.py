@@ -120,8 +120,9 @@ for i in range(9):
 for i in range(14):
     code_ptr(0x0500+2*i)
 
-entry(0x8694) #Orphaned code? No caller?
-entry(0x89EA) #Orphaned code? No caller?
+for i in range(7):
+    code_ptr(0x825b+3*i)
+
 entry(0x8BF2) #Orphaned code? No caller?
 entry(0x8D06) #Orphaned code? No caller?
 entry(0x9007) #Orphaned code? No caller?

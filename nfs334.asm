@@ -370,6 +370,7 @@ l8014 = l800d+7
     lda l0f05                                                         ; 8085: ad 05 0f    ...
     ldy #&16                                                          ; 8088: a0 16       ..
     bne c809f                                                         ; 808a: d0 13       ..
+.sub_c808c
     jsr sub_c8508                                                     ; 808c: 20 08 85     ..
     cmp #8                                                            ; 808f: c9 08       ..
     bcs c80ae                                                         ; 8091: b0 1b       ..
@@ -649,8 +650,19 @@ l8014 = l800d+7
 .l824d
     equb &1b, &ff, &1e, &ff, &21, &ff, &24, &ff, &27, &ff, &2a, &ff   ; 824d: 1b ff 1e... ...
     equb &2d, &ff                                                     ; 8259: 2d ff       -.
-    equb &94, &86,   0, &e1, &88,   0, &85, &84,   0, &a2, &83,   0   ; 825b: 94 86 00... ...
-    equb &ea, &89,   0, &49, &89,   0, &8c, &80                       ; 8267: ea 89 00... ...
+    equw sub_c8694                                                    ; 825b: 94 86       ..
+    equb 0                                                            ; 825d: 00          .
+    equw sub_c88e1                                                    ; 825e: e1 88       ..
+    equb 0                                                            ; 8260: 00          .
+    equw sub_c8485                                                    ; 8261: 85 84       ..
+    equb 0                                                            ; 8263: 00          .
+    equw sub_c83a2                                                    ; 8264: a2 83       ..
+    equb 0                                                            ; 8266: 00          .
+    equw sub_c89ea                                                    ; 8267: ea 89       ..
+    equb 0                                                            ; 8269: 00          .
+    equw sub_c8949                                                    ; 826a: 49 89       I.
+    equb 0                                                            ; 826c: 00          .
+    equw sub_c808c                                                    ; 826d: 8c 80       ..
 
 .sub_c826f
     cpy #&10                                                          ; 826f: c0 10       ..
@@ -865,6 +877,7 @@ l8014 = l800d+7
     jsr sub_c9248                                                     ; 839b: 20 48 92     H.
     sta l00b3                                                         ; 839e: 85 b3       ..
     bcc loop_c838a                                                    ; 83a0: 90 e8       ..
+.sub_c83a2
     clc                                                               ; 83a2: 18          .
 ; &83a3 referenced 1 time by &8486
 .sub_c83a3
@@ -1022,6 +1035,7 @@ l8014 = l800d+7
     bpl c84a3                                                         ; 847e: 10 23       .#
     jsr osbyte                                                        ; 8480: 20 f4 ff     ..
     bne c842a                                                         ; 8483: d0 a5       ..
+.sub_c8485
     sec                                                               ; 8485: 38          8
     jsr sub_c83a3                                                     ; 8486: 20 a3 83     ..
     sec                                                               ; 8489: 38          8
@@ -1437,6 +1451,7 @@ l8014 = l800d+7
     pla                                                               ; 8692: 68          h
     rts                                                               ; 8693: 60          `
 
+.sub_c8694
     jsr sub_c8508                                                     ; 8694: 20 08 85     ..
     ldy #1                                                            ; 8697: a0 01       ..
 ; &8699 referenced 1 time by &869f
@@ -1820,6 +1835,7 @@ l8014 = l800d+7
 ; &88df referenced 1 time by &8895
 .c88df
     bpl c892e                                                         ; 88df: 10 4d       .M
+.sub_c88e1
     jsr sub_c8508                                                     ; 88e1: 20 08 85     ..
     cmp #3                                                            ; 88e4: c9 03       ..
     bcs c892c                                                         ; 88e6: b0 44       .D
@@ -1894,6 +1910,7 @@ l8014 = l800d+7
 .c8945
     lda #0                                                            ; 8945: a9 00       ..
     bpl c892e                                                         ; 8947: 10 e5       ..
+.sub_c8949
     jsr sub_c8508                                                     ; 8949: 20 08 85     ..
     sec                                                               ; 894c: 38          8
     jsr sub_c858a                                                     ; 894d: 20 8a 85     ..
@@ -2000,6 +2017,7 @@ l8014 = l800d+7
     bne loop_c89d4                                                    ; 89e7: d0 eb       ..
     rts                                                               ; 89e9: 60          `
 
+.sub_c89ea
     jsr sub_c8508                                                     ; 89ea: 20 08 85     ..
     tax                                                               ; 89ed: aa          .
     beq c89f5                                                         ; 89ee: f0 05       ..
@@ -7174,6 +7192,7 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c065d
 ;     sub_c06a3
 ;     sub_c8069
+;     sub_c808c
 ;     sub_c815c
 ;     sub_c8172
 ;     sub_c819b
@@ -7193,10 +7212,12 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c8351
 ;     sub_c836a
 ;     sub_c8380
+;     sub_c83a2
 ;     sub_c83a3
 ;     sub_c8448
 ;     sub_c844a
 ;     sub_c847a
+;     sub_c8485
 ;     sub_c84a4
 ;     sub_c84a5
 ;     sub_c84aa
@@ -7225,17 +7246,21 @@ l9ed2 = sub_c9ed1+1
 ;     sub_c864c
 ;     sub_c864e
 ;     sub_c8650
+;     sub_c8694
 ;     sub_c86d0
 ;     sub_c8716
 ;     sub_c87ad
 ;     sub_c87ba
 ;     sub_c87c8
 ;     sub_c881f
+;     sub_c88e1
+;     sub_c8949
 ;     sub_c89a1
 ;     sub_c89ca
 ;     sub_c89cf
 ;     sub_c89d1
 ;     sub_c89d2
+;     sub_c89ea
 ;     sub_c8bfd
 ;     sub_c8cf7
 ;     sub_c8cfc
@@ -7514,5 +7539,12 @@ l9ed2 = sub_c9ed1+1
     assert sub_c063b == &063b
     assert sub_c065d == &065d
     assert sub_c06a3 == &06a3
+    assert sub_c808c == &808c
+    assert sub_c83a2 == &83a2
+    assert sub_c8485 == &8485
+    assert sub_c8694 == &8694
+    assert sub_c88e1 == &88e1
+    assert sub_c8949 == &8949
+    assert sub_c89ea == &89ea
 
 save "nfs334.6502", pydis_start, pydis_end
