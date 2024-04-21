@@ -648,20 +648,32 @@ l8014 = l800d+7
     equb &0d                                                          ; 824c: 0d          .
 ; &824d referenced 1 time by &8219
 .l824d
-    equb &1b, &ff, &1e, &ff, &21, &ff, &24, &ff, &27, &ff, &2a, &ff   ; 824d: 1b ff 1e... ...
-    equb &2d, &ff                                                     ; 8259: 2d ff       -.
+    equb l825b - c8240,           &ff                                 ; 824d: 1b ff       ..
+    equb l825e - c8240,           &ff                                 ; 824f: 1e ff       ..
+    equb l8261 - c8240,           &ff                                 ; 8251: 21 ff       !.
+    equb l8264 - c8240,           &ff                                 ; 8253: 24 ff       $.
+    equb l8267 - c8240,           &ff                                 ; 8255: 27 ff       '.
+    equb l826a - c8240,           &ff                                 ; 8257: 2a ff       *.
+    equb l826d - c8240,           &ff                                 ; 8259: 2d ff       -.
+.l825b
     equw sub_c8694                                                    ; 825b: 94 86       ..
     equb 0                                                            ; 825d: 00          .
+.l825e
     equw sub_c88e1                                                    ; 825e: e1 88       ..
     equb 0                                                            ; 8260: 00          .
+.l8261
     equw sub_c8485                                                    ; 8261: 85 84       ..
     equb 0                                                            ; 8263: 00          .
+.l8264
     equw sub_c83a2                                                    ; 8264: a2 83       ..
     equb 0                                                            ; 8266: 00          .
+.l8267
     equw sub_c89ea                                                    ; 8267: ea 89       ..
     equb 0                                                            ; 8269: 00          .
+.l826a
     equw sub_c8949                                                    ; 826a: 49 89       I.
     equb 0                                                            ; 826c: 00          .
+.l826d
     equw sub_c808c                                                    ; 826d: 8c 80       ..
 
 .sub_c826f
@@ -7509,6 +7521,13 @@ l9ed2 = sub_c9ed1+1
     assert econet_INTOFF == &fe18
     assert econet_station_id == &fe18
     assert event_network_error == &08
+    assert l825b - c8240 == &1b
+    assert l825e - c8240 == &1e
+    assert l8261 - c8240 == &21
+    assert l8264 - c8240 == &24
+    assert l8267 - c8240 == &27
+    assert l826a - c8240 == &2a
+    assert l826d - c8240 == &2d
     assert osbyte_close_spool_exec == &77
     assert osbyte_explode_chars == &14
     assert osbyte_insert_input_buffer == &99

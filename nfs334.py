@@ -9,6 +9,11 @@ def mllh(addr, label_name, lo_ref, hi_ref=None): # mllh notionally stands for ma
     expr(lo_ref, make_lo(label_name))
     expr(hi_ref, make_hi(label_name))
 
+def mloff(addr, label_name, offset_ref, offset_name): # mllh notionally stands for make_label_offset
+    label(addr, label_name)
+    expr(offset_ref, make_subtract(label_name, offset_name))
+
+
 load(0x8000, "NFS-3.34.rom", "6502")
 move(0x0400, 0x934c, 0x300)
 set_output_filename("nfs334.6502")
@@ -32,7 +37,8 @@ string(0x8BEF,n=None)
 string(0x8CE7,n=None)
 
 byte(0x8015,n=11)
-byte(0x824d,n=14)
+for i in range(7):
+    byte(0x824d+i*2,n=2)
 byte(0x84BB,n=1)
 byte(0x84C6,n=1)
 byte(0x84D5,n=1)
@@ -45,6 +51,7 @@ for i in range(9):
     byte(0x964c+i*2,n=2)
 byte(0x9F4B,n=8)
 
+    
 label(0xfe18,"econet_station_id")
 label(0xfe18,"econet_INTOFF")
 label(0xfe20,"econet_INTON")
@@ -83,6 +90,14 @@ mllh(0x9992, "l9992", 0x998c)
 label(0x9bdd,"l9bdd")
 expr(0x9b9c, make_hi(make_subtract("l9bdd",1)))
 expr(0x9b9f, make_lo(make_subtract("l9bdd",1)))
+
+mloff(0x825b, "l825b", 0x824d, "c8240")
+mloff(0x825e, "l825e", 0x824f, "c8240")
+mloff(0x8261, "l8261", 0x8251, "c8240")
+mloff(0x8264, "l8264", 0x8253, "c8240")
+mloff(0x8267, "l8267", 0x8255, "c8240")
+mloff(0x826a, "l826a", 0x8257, "c8240")
+mloff(0x826d, "l826d", 0x8259, "c8240")
 
 expr(0x82c4, "econet_station_id")
 expr(0x968f, "econet_station_id")
@@ -129,9 +144,9 @@ entry(0x9007) #Orphaned code? No caller?
 entry(0x9307) #Relocated to &16. Orphaned code? No caller?
 entry(0x934C) #Relocated to &400 Orphaned code? No caller?
 entry(0x934F) #Relocated to &403. Orphaned code? No caller?
-entry(0x9433) #Relocated to 0x4e9. Orphaned code? No caller?
-entry(0x943B) #Relocated to 0x4ef. Orphaned code? No caller?
-entry(0x9468) #Relocated to 0x51d. Orphaned code? No caller?
+entry(0x9433) #Relocated to &4e9. Orphaned code? No caller?
+entry(0x943B) #Relocated to &4ef. Orphaned code? No caller?
+entry(0x9468) #Relocated to &51d. Orphaned code? No caller?
 
 entry(0x9715) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
 entry(0x9747) #Called by setting A=Lo, Y=Hi and jumping to &0d0e
