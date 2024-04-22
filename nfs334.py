@@ -28,6 +28,46 @@ econet_INTON      = &fe3c
 **************************************************************
 ''')
 
+comment(0x8db7, '''
+**************************************************************
+OSBYTE calls
+------------
+Refer to NFS08 of DNFS source for comments
+
+**************************************************************
+''')
+
+comment(0x8e18, '''
+**************************************************************
+Table of OSWORD calls
+---------------------
+&70 :    Call TRANSMIT
+&71 : 0  Open Rxcb
+    : n  Read Rxcb(n)
+&72 :    Read Routine arguments
+&73 : 0  Read File Server Id
+    : 1  Set File Server Id
+    : 2  Read Printer Server Id
+    : 3  Set Printer Server Id
+    : 4  Read protection masks
+    : 5  Set protection masks
+    : 6  Read context handles
+    : 7  Set context handles
+    : 8  Read local station number
+    : 9  Read Routine arguments buffer size
+&74 :    DOFSOP type call
+**************************************************************
+''')
+
+comment(0x90be, '''
+**************************************************************
+Refer to NFS09 of DNFS Source
+-----------------------------
+Note that LDX instructions at &906b and &9074 will need to be
+updated to reflect table sizes
+**************************************************************
+''')
+
 comment(0x934c, '''
 **************************************************************
 Tube handler code
@@ -49,7 +89,12 @@ Note the self modifying code at the &d0b JMP (changed by &d0e)
 acorn.bbc()
 acorn.is_sideways_rom()
 
-string(0x8BD7,n=None)
+constant(0x20, "data_carier_detect")
+constant(0x55, "internal_keyscan_N")
+expr(0x81dd, "internal_keyscan_N")
+expr(0x81ff, "data_carier_detect")
+
+string(0x8BD6,n=None)
 stringcr(0x8BE5)
 stringcr(0x8BEA)
 string(0x8CE7,n=None)
@@ -69,6 +114,19 @@ for i in range(9):
     byte(0x964c+i*2,n=2)
 byte(0x9F4B,n=8)
     
+label(0x8079,"comm_err")
+label(0x81cc,"auto_boot")
+label(0x8349,"bye")
+label(0x8350,"do_fs_op")
+label(0x85af,"decimal_print_routine")
+label(0x8bf2,"inf_all")
+label(0x8d06,"logon")
+label(0x8d5c,"print_x_spaces")
+label(0x8e33,"call_tx")
+label(0x8e53,"read_jsr_arg")
+label(0x8e7b,"read_set_server_ids")
+label(0x8ef0,"open_rxcb")
+label(0x8f72,"do_fs_op_call")
 label(0xfe18,"econet_station_id")
 label(0xfe18,"econet_INTOFF")
 label(0xfe20,"econet_INTON")
@@ -137,6 +195,10 @@ expr(0x82df, make_subtract("l8276", "c8240"))
 label(0x9bdd,"l9bdd")
 expr(0x9b9c, make_hi(make_subtract("l9bdd",1)))
 expr(0x9b9f, make_lo(make_subtract("l9bdd",1)))
+
+label(0x8245,"bootup")
+expr(0x8241, make_hi("bootup"))
+expr(0x823f, make_lo("bootup"))
 
 for i in range(36):
     rts_code_ptr(0x8020+1+i, 0x8044+1+i)

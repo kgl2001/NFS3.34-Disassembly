@@ -1,6 +1,8 @@
 ; Constants
 buffer_printer                                  = 3
+data_carier_detect                              = 32
 event_network_error                             = 8
+internal_keyscan_N                              = 85
 osbyte_close_spool_exec                         = 119
 osbyte_explode_chars                            = 20
 osbyte_insert_input_buffer                      = 153
@@ -356,10 +358,10 @@ l8014 = l800d+7
     ldy #&20 ; ' '                                                    ; 8075: a0 20       .
     bne c809f                                                         ; 8077: d0 26       .&
 ; &8079 referenced 1 time by &8d1c
-.c8079
+.comm_err
     jsr sub_c8d63                                                     ; 8079: 20 63 8d     c.
     tay                                                               ; 807c: a8          .
-    jsr sub_c8350                                                     ; 807d: 20 50 83     P.
+    jsr do_fs_op                                                      ; 807d: 20 50 83     P.
     ldx l0f03                                                         ; 8080: ae 03 0f    ...
     beq c80ae                                                         ; 8083: f0 29       .)
     lda l0f05                                                         ; 8085: ad 05 0f    ...
@@ -523,7 +525,7 @@ l8014 = l800d+7
     bne c81c9                                                         ; 8182: d0 45       .E
 ; &8184 referenced 1 time by &8125
 .c8184
-    jsr sub_c81cc                                                     ; 8184: 20 cc 81     ..
+    jsr auto_boot                                                     ; 8184: 20 cc 81     ..
     sec                                                               ; 8187: 38          8
     ror l00cd                                                         ; 8188: 66 cd       f.
     jsr sub_c822e                                                     ; 818a: 20 2e 82     ..
@@ -576,17 +578,17 @@ l8014 = l800d+7
     rts                                                               ; 81cb: 60          `
 
 ; &81cc referenced 2 times by &8184, &81d1
-.sub_c81cc
+.auto_boot
     lda #6                                                            ; 81cc: a9 06       ..
     jmp (fscv)                                                        ; 81ce: 6c 1e 02    l..
 
 .sub_c81d1
-    jsr sub_c81cc                                                     ; 81d1: 20 cc 81     ..
+    jsr auto_boot                                                     ; 81d1: 20 cc 81     ..
     lda #osbyte_scan_keyboard_from_16                                 ; 81d4: a9 7a       .z
     jsr osbyte                                                        ; 81d6: 20 f4 ff     ..            ; Keyboard scan starting from key 16
     txa                                                               ; 81d9: 8a          .              ; X is key number if key is pressed, or &ff otherwise
     bmi c81e6                                                         ; 81da: 30 0a       0.
-    eor #&55 ; 'U'                                                    ; 81dc: 49 55       IU
+    eor #internal_keyscan_N                                           ; 81dc: 49 55       IU
     bne c81c9                                                         ; 81de: d0 e9       ..
     tay                                                               ; 81e0: a8          .              ; Y=key
     lda #osbyte_write_keys_pressed                                    ; 81e1: a9 78       .x
@@ -597,8 +599,8 @@ l8014 = l800d+7
     equs "Econet Station "                                            ; 81e9: 45 63 6f... Eco
 
     lda l0d62                                                         ; 81f8: ad 62 0d    .b.
-    jsr sub_c85af                                                     ; 81fb: 20 af 85     ..
-    lda #&20 ; ' '                                                    ; 81fe: a9 20       .
+    jsr decimal_print_routine                                         ; 81fb: 20 af 85     ..
+    lda #data_carier_detect                                           ; 81fe: a9 20       .
     bit econet_adlc_address_1                                         ; 8200: 2c a1 fe    ,..
     beq c8212                                                         ; 8203: f0 0d       ..
     jsr print_message_and_fall_through                                ; 8205: 20 3b 85     ;.
@@ -633,12 +635,13 @@ l8014 = l800d+7
     jsr osbyte                                                        ; 8237: 20 f4 ff     ..
     ldx l00cd                                                         ; 823a: a6 cd       ..
     bne c8275                                                         ; 823c: d0 37       .7
-    ldx #&45 ; 'E'                                                    ; 823e: a2 45       .E
+    ldx #<bootup                                                      ; 823e: a2 45       .E
 ; &8240 referenced 2 times by &82e5, &82eb
 .c8240
-    ldy #&82                                                          ; 8240: a0 82       ..
+    ldy #>bootup                                                      ; 8240: a0 82       ..
     jmp c8b92                                                         ; 8242: 4c 92 8b    L..
 
+.bootup
     equs "I .BOOT"                                                    ; 8245: 49 20 2e... I .
     equb &0d                                                          ; 824c: 0d          .
 ; &824d referenced 1 time by &8219
@@ -816,12 +819,12 @@ l8014 = l800d+7
 .sub_c8346
     clv                                                               ; 8346: b8          .
     bvc c8359                                                         ; 8347: 50 10       P.
-.sub_c8349
+.bye
     lda #osbyte_close_spool_exec                                      ; 8349: a9 77       .w
     jsr osbyte                                                        ; 834b: 20 f4 ff     ..            ; Close any *SPOOL and *EXEC files
     ldy #&17                                                          ; 834e: a0 17       ..
 ; &8350 referenced 12 times by &807d, &8834, &88aa, &88fc, &8923, &8996, &89c0, &8a9a, &8b50, &8c18, &8c4f, &8cc8
-.sub_c8350
+.do_fs_op
     clv                                                               ; 8350: b8          .
 ; &8351 referenced 2 times by &8892, &896c
 .sub_c8351
@@ -1267,7 +1270,7 @@ l8014 = l800d+7
     rts                                                               ; 85ae: 60          `
 
 ; &85af referenced 2 times by &81fb, &8c27
-.sub_c85af
+.decimal_print_routine
     tay                                                               ; 85af: a8          .
     lda #&64 ; 'd'                                                    ; 85b0: a9 64       .d
     jsr sub_c85bc                                                     ; 85b2: 20 bc 85     ..
@@ -1730,7 +1733,7 @@ l8014 = l800d+7
     sty l0f05                                                         ; 882d: 8c 05 0f    ...
     ldy #&11                                                          ; 8830: a0 11       ..
     ldx #1                                                            ; 8832: a2 01       ..
-    jsr sub_c8350                                                     ; 8834: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8834: 20 50 83     P.
     pla                                                               ; 8837: 68          h
     ldx l0f05                                                         ; 8838: ae 05 0f    ...
     bne c8840                                                         ; 883b: d0 03       ..
@@ -1809,7 +1812,7 @@ l8014 = l800d+7
     ldx #1                                                            ; 88a3: a2 01       ..
     jsr sub_c8d65                                                     ; 88a5: 20 65 8d     e.
     ldy #&12                                                          ; 88a8: a0 12       ..
-    jsr sub_c8350                                                     ; 88aa: 20 50 83     P.
+    jsr do_fs_op                                                      ; 88aa: 20 50 83     P.
     lda l0f11                                                         ; 88ad: ad 11 0f    ...
     stx l0f11                                                         ; 88b0: 8e 11 0f    ...
     stx l0f14                                                         ; 88b3: 8e 14 0f    ...
@@ -1857,7 +1860,7 @@ l8014 = l800d+7
     bcs c8912                                                         ; 88f6: b0 1a       ..
     ldy #&0c                                                          ; 88f8: a0 0c       ..
     ldx #2                                                            ; 88fa: a2 02       ..
-    jsr sub_c8350                                                     ; 88fc: 20 50 83     P.
+    jsr do_fs_op                                                      ; 88fc: 20 50 83     P.
     sta l00bd                                                         ; 88ff: 85 bd       ..
     ldx l00bb                                                         ; 8901: a6 bb       ..
     ldy #2                                                            ; 8903: a0 02       ..
@@ -1886,7 +1889,7 @@ l8014 = l800d+7
     bpl loop_c8916                                                    ; 891d: 10 f7       ..
     ldy #&0d                                                          ; 891f: a0 0d       ..
     ldx #5                                                            ; 8921: a2 05       ..
-    jsr sub_c8350                                                     ; 8923: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8923: 20 50 83     P.
     stx l00bd                                                         ; 8926: 86 bd       ..
     pla                                                               ; 8928: 68          h
     jsr sub_c85e4                                                     ; 8929: 20 e4 85     ..
@@ -1960,7 +1963,7 @@ l8014 = l800d+7
     sty l0f05                                                         ; 898f: 8c 05 0f    ...
     ldx #1                                                            ; 8992: a2 01       ..
     ldy #7                                                            ; 8994: a0 07       ..
-    jsr sub_c8350                                                     ; 8996: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8996: 20 50 83     P.
     lda l0f05                                                         ; 8999: ad 05 0f    ...
     jsr sub_c85e4                                                     ; 899c: 20 e4 85     ..
 ; &899f referenced 1 time by &89c8
@@ -1988,7 +1991,7 @@ l8014 = l800d+7
 .c89bb
     sty l0f05                                                         ; 89bb: 8c 05 0f    ...
     ldy #&16                                                          ; 89be: a0 16       ..
-    jsr sub_c8350                                                     ; 89c0: 20 50 83     P.
+    jsr do_fs_op                                                      ; 89c0: 20 50 83     P.
     ldy l00bc                                                         ; 89c3: a4 bc       ..
     sty l0e05                                                         ; 89c5: 8c 05 0e    ...
 ; &89c8 referenced 1 time by &89b4
@@ -2139,7 +2142,7 @@ l8014 = l800d+7
 ; &8a98 referenced 1 time by &8ac8
 .c8a98
     ldy #&15                                                          ; 8a98: a0 15       ..
-    jsr sub_c8350                                                     ; 8a9a: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8a9a: 20 50 83     P.
     lda l0e05                                                         ; 8a9d: ad 05 0e    ...
     sta l0f16                                                         ; 8aa0: 8d 16 0f    ...
     stx l00b0                                                         ; 8aa3: 86 b0       ..
@@ -2247,7 +2250,7 @@ l8014 = l800d+7
     sty l00b0                                                         ; 8b4a: 84 b0       ..
     sty l0f05                                                         ; 8b4c: 8c 05 0f    ...
     iny                                                               ; 8b4f: c8          .
-    jsr sub_c8350                                                     ; 8b50: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8b50: 20 50 83     P.
     stx l00b1                                                         ; 8b53: 86 b1       ..
     lda l0f06                                                         ; 8b55: ad 06 0f    ...
     sta (l00bb,x)                                                     ; 8b58: 81 bb       ..
@@ -2336,28 +2339,27 @@ l8014 = l800d+7
 
 ; &8bd6 referenced 2 times by &8b9b, &8ba8
 .l8bd6
-    equb &49                                                          ; 8bd6: 49          I
+l8bd7 = l8bd6+1
+    equs "I."                                                         ; 8bd6: 49 2e       I.
 ; &8bd7 referenced 1 time by &8bb9
-.l8bd7
-    equs "."                                                          ; 8bd7: 2e          .
-    equb >(c8079-1)                                                   ; 8bd8: 80          .
-    equb <(c8079-1)                                                   ; 8bd9: 78          x
+    equb >(comm_err-1)                                                ; 8bd8: 80          .
+    equb <(comm_err-1)                                                ; 8bd9: 78          x
     equs "I AM"                                                       ; 8bda: 49 20 41... I A
-    equb >(sub_c8d06-1)                                               ; 8bde: 8d          .
-    equb <(sub_c8d06-1)                                               ; 8bdf: 05          .
+    equb >(logon-1)                                                   ; 8bde: 8d          .
+    equb <(logon-1)                                                   ; 8bdf: 05          .
     equs "EX "                                                        ; 8be0: 45 58 20    EX
-    equb >(sub_c8bf2-1)                                               ; 8be3: 8b          .
-    equb <(sub_c8bf2-1)                                               ; 8be4: f1          .
+    equb >(inf_all-1)                                                 ; 8be3: 8b          .
+    equb <(inf_all-1)                                                 ; 8be4: f1          .
     equs "EX", &0d                                                    ; 8be5: 45 58 0d    EX.
-    equb >(sub_c8bf2-1)                                               ; 8be8: 8b          .
-    equb <(sub_c8bf2-1)                                               ; 8be9: f1          .
+    equb >(inf_all-1)                                                 ; 8be8: 8b          .
+    equb <(inf_all-1)                                                 ; 8be9: f1          .
     equs "BYE", &0d                                                   ; 8bea: 42 59 45... BYE
-    equb >(sub_c8349-1)                                               ; 8bee: 83          .
-    equb <(sub_c8349-1)                                               ; 8bef: 48          H
-    equb >(c8079-1)                                                   ; 8bf0: 80          .
-    equb <(c8079-1)                                                   ; 8bf1: 78          x
+    equb >(bye-1)                                                     ; 8bee: 83          .
+    equb <(bye-1)                                                     ; 8bef: 48          H
+    equb >(comm_err-1)                                                ; 8bf0: 80          .
+    equb <(comm_err-1)                                                ; 8bf1: 78          x
 
-.sub_c8bf2
+.inf_all
     dey                                                               ; 8bf2: 88          .
     ldx #1                                                            ; 8bf3: a2 01       ..
     stx l00b7                                                         ; 8bf5: 86 b7       ..
@@ -2379,19 +2381,19 @@ l8014 = l800d+7
     ldx #1                                                            ; 8c11: a2 01       ..
     jsr c8d67                                                         ; 8c13: 20 67 8d     g.
     ldy #&12                                                          ; 8c16: a0 12       ..
-    jsr sub_c8350                                                     ; 8c18: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8c18: 20 50 83     P.
     ldx #3                                                            ; 8c1b: a2 03       ..
     jsr sub_c8d4f                                                     ; 8c1d: 20 4f 8d     O.
     jsr print_message_and_fall_through                                ; 8c20: 20 3b 85     ;.
     equs "("                                                          ; 8c23: 28          (
 
     lda l0f13                                                         ; 8c24: ad 13 0f    ...
-    jsr sub_c85af                                                     ; 8c27: 20 af 85     ..
+    jsr decimal_print_routine                                         ; 8c27: 20 af 85     ..
     jsr print_message_and_fall_through                                ; 8c2a: 20 3b 85     ;.
     equs ")"                                                          ; 8c2d: 29          )
 
     ldx #5                                                            ; 8c2e: a2 05       ..
-    jsr c8d5c                                                         ; 8c30: 20 5c 8d     \.
+    jsr print_x_spaces                                                ; 8c30: 20 5c 8d     \.
     ldx l0f12                                                         ; 8c33: ae 12 0f    ...
     bne c8c43                                                         ; 8c36: d0 0b       ..
     jsr print_message_and_fall_through                                ; 8c38: 20 3b 85     ;.
@@ -2406,12 +2408,12 @@ l8014 = l800d+7
 ; &8c4d referenced 1 time by &8c41
 .c8c4d
     ldy #&15                                                          ; 8c4d: a0 15       ..
-    jsr sub_c8350                                                     ; 8c4f: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8c4f: 20 50 83     P.
     inx                                                               ; 8c52: e8          .
     ldy #&10                                                          ; 8c53: a0 10       ..
     jsr c8d51                                                         ; 8c55: 20 51 8d     Q.
     ldx #4                                                            ; 8c58: a2 04       ..
-    jsr c8d5c                                                         ; 8c5a: 20 5c 8d     \.
+    jsr print_x_spaces                                                ; 8c5a: 20 5c 8d     \.
     jsr print_message_and_fall_through                                ; 8c5d: 20 3b 85     ;.
     equs "Option "                                                    ; 8c60: 4f 70 74... Opt
 
@@ -2437,7 +2439,7 @@ l8014 = l800d+7
     ldx #&11                                                          ; 8c8b: a2 11       ..
     jsr sub_c8d4f                                                     ; 8c8d: 20 4f 8d     O.
     ldx #5                                                            ; 8c90: a2 05       ..
-    jsr c8d5c                                                         ; 8c92: 20 5c 8d     \.
+    jsr print_x_spaces                                                ; 8c92: 20 5c 8d     \.
     jsr print_message_and_fall_through                                ; 8c95: 20 3b 85     ;.
     equs "Lib. "                                                      ; 8c98: 4c 69 62... Lib
 
@@ -2466,7 +2468,7 @@ l8014 = l800d+7
     ldx #3                                                            ; 8cc1: a2 03       ..
     jsr c8d67                                                         ; 8cc3: 20 67 8d     g.
     ldy #3                                                            ; 8cc6: a0 03       ..
-    jsr sub_c8350                                                     ; 8cc8: 20 50 83     P.
+    jsr do_fs_op                                                      ; 8cc8: 20 50 83     P.
     lda l0f05                                                         ; 8ccb: ad 05 0f    ...
     beq c8cff                                                         ; 8cce: f0 2f       ./
     ldx #2                                                            ; 8cd0: a2 02       ..
@@ -2498,7 +2500,7 @@ l8014 = l800d+7
 .l8d02
     equb &f6, &e7, &e9, &ef                                           ; 8d02: f6 e7 e9... ...
 
-.sub_c8d06
+.logon
     jsr c8555                                                         ; 8d06: 20 55 85     U.
     bcs c8d1c                                                         ; 8d09: b0 11       ..
     lda #0                                                            ; 8d0b: a9 00       ..
@@ -2512,7 +2514,7 @@ l8014 = l800d+7
     stx l0e01                                                         ; 8d19: 8e 01 0e    ...
 ; &8d1c referenced 1 time by &8d09
 .c8d1c
-    jmp c8079                                                         ; 8d1c: 4c 79 80    Ly.
+    jmp comm_err                                                      ; 8d1c: 4c 79 80    Ly.
 
 .sub_c8d1f
     sec                                                               ; 8d1f: 38          8
@@ -2559,10 +2561,10 @@ l8014 = l800d+7
     rts                                                               ; 8d5b: 60          `
 
 ; &8d5c referenced 4 times by &8c30, &8c5a, &8c92, &8d60
-.c8d5c
+.print_x_spaces
     jsr sub_c8640                                                     ; 8d5c: 20 40 86     @.
     dex                                                               ; 8d5f: ca          .
-    bne c8d5c                                                         ; 8d60: d0 fa       ..
+    bne print_x_spaces                                                ; 8d60: d0 fa       ..
     rts                                                               ; 8d62: 60          `
 
 ; &8d63 referenced 3 times by &8079, &86cb, &888a
@@ -2624,6 +2626,14 @@ l8014 = l800d+7
     lda (l009c),y                                                     ; 8db1: b1 9c       ..
     sta l00f0                                                         ; 8db3: 85 f0       ..
     bcc c8dda                                                         ; 8db5: 90 23       .#
+; 
+; **************************************************************
+; OSBYTE calls
+; ------------
+; Refer to NFS08 of DNFS source for comments
+; 
+; **************************************************************
+; 
 ; &8db7 referenced 5 times by &82b6, &8dcb, &8de1, &8f01, &8f1a
 .sub_c8db7
     asl a                                                             ; 8db7: 0a          .
@@ -2695,20 +2705,41 @@ l8014 = l800d+7
     lda (l00f0),y                                                     ; 8e15: b1 f0       ..
     rts                                                               ; 8e17: 60          `
 
+; 
+; **************************************************************
+; Table of OSWORD calls
+; ---------------------
+; &70 :    Call TRANSMIT
+; &71 : 0  Open Rxcb
+;     : n  Read Rxcb(n)
+; &72 :    Read Routine arguments
+; &73 : 0  Read File Server Id
+;     : 1  Set File Server Id
+;     : 2  Read Printer Server Id
+;     : 3  Set Printer Server Id
+;     : 4  Read protection masks
+;     : 5  Set protection masks
+;     : 6  Read context handles
+;     : 7  Set context handles
+;     : 8  Read local station number
+;     : 9  Read Routine arguments buffer size
+; &74 :    DOFSOP type call
+; **************************************************************
+; 
 ; &8e18 referenced 1 time by &8e06
 .l8e18
-    equb <(sub_c8e33-1)                                               ; 8e18: 32          2
-    equb <(sub_c8ef0-1)                                               ; 8e19: ef          .
-    equb <(sub_c8e53-1)                                               ; 8e1a: 52          R
-    equb <(sub_c8e7b-1)                                               ; 8e1b: 7a          z
-    equb <(sub_c8f72-1)                                               ; 8e1c: 71          q
+    equb <(call_tx-1)                                                 ; 8e18: 32          2
+    equb <(open_rxcb-1)                                               ; 8e19: ef          .
+    equb <(read_jsr_arg-1)                                            ; 8e1a: 52          R
+    equb <(read_set_server_ids-1)                                     ; 8e1b: 7a          z
+    equb <(do_fs_op_call-1)                                           ; 8e1c: 71          q
 ; &8e1d referenced 1 time by &8e02
 .l8e1d
-    equb >(sub_c8e33-1)                                               ; 8e1d: 8e          .
-    equb >(sub_c8ef0-1)                                               ; 8e1e: 8e          .
-    equb >(sub_c8e53-1)                                               ; 8e1f: 8e          .
-    equb >(sub_c8e7b-1)                                               ; 8e20: 8e          .
-    equb >(sub_c8f72-1)                                               ; 8e21: 8f          .
+    equb >(call_tx-1)                                                 ; 8e1d: 8e          .
+    equb >(open_rxcb-1)                                               ; 8e1e: 8e          .
+    equb >(read_jsr_arg-1)                                            ; 8e1f: 8e          .
+    equb >(read_set_server_ids-1)                                     ; 8e20: 8e          .
+    equb >(do_fs_op_call-1)                                           ; 8e21: 8f          .
 
 ; &8e22 referenced 5 times by &8e30, &8e46, &8e62, &8e96, &8f31
 .c8e22
@@ -2729,7 +2760,7 @@ l8014 = l800d+7
 .c8e32
     rts                                                               ; 8e32: 60          `
 
-.sub_c8e33
+.call_tx
     asl l0d3a                                                         ; 8e33: 0e 3a 0d    .:.
     bcc c8e4f                                                         ; 8e36: 90 17       ..
     lda l009d                                                         ; 8e38: a5 9d       ..
@@ -2748,7 +2779,7 @@ l8014 = l800d+7
     sec                                                               ; 8e4f: 38          8
     tya                                                               ; 8e50: 98          .
     bcs c8e75                                                         ; 8e51: b0 22       ."
-.sub_c8e53
+.read_jsr_arg
     lda l009d                                                         ; 8e53: a5 9d       ..
     sta l00bf                                                         ; 8e55: 85 bf       ..
     ldy #&7f                                                          ; 8e57: a0 7f       ..
@@ -2777,7 +2808,7 @@ l8014 = l800d+7
 .l8e79
     equb &ff,   1                                                     ; 8e79: ff 01       ..
 
-.sub_c8e7b
+.read_set_server_ids
     cmp #6                                                            ; 8e7b: c9 06       ..
     bcs c8eb7                                                         ; 8e7d: b0 38       .8
     cmp #4                                                            ; 8e7f: c9 04       ..
@@ -2856,7 +2887,7 @@ l8014 = l800d+7
     dey                                                               ; 8eeb: 88          .
     bne c8ee3                                                         ; 8eec: d0 f5       ..
     beq c8f48                                                         ; 8eee: f0 58       .X
-.sub_c8ef0
+.open_rxcb
     ldx l009f                                                         ; 8ef0: a6 9f       ..
     stx l00bf                                                         ; 8ef2: 86 bf       ..
     sty l00be                                                         ; 8ef4: 84 be       ..
@@ -2951,7 +2982,7 @@ l8014 = l800d+7
     sta (l009e),y                                                     ; 8f6f: 91 9e       ..
     rts                                                               ; 8f71: 60          `
 
-.sub_c8f72
+.do_fs_op_call
     cmp #1                                                            ; 8f72: c9 01       ..
     bcs c8fc0                                                         ; 8f74: b0 4a       .J
     ldy #&2f ; '/'                                                    ; 8f76: a0 2f       ./
@@ -3199,6 +3230,14 @@ l8014 = l800d+7
 .c90bd
     rts                                                               ; 90bd: 60          `
 
+; 
+; **************************************************************
+; Refer to NFS09 of DNFS Source
+; -----------------------------
+; Note that LDX instructions at &906b and &9074 will need to be
+; updated to reflect table sizes
+; **************************************************************
+; 
 ; &90be referenced 1 time by &90b5
 .l90be
     equb   4,   9, &0a, &14, &9a, &9b, &9c, &e2, &0b, &0c, &0f, &79   ; 90be: 04 09 0a... ...
@@ -5770,7 +5809,7 @@ l0d1e = sub_c0d1c+2
 ;     l00b0:                           13
 ;     print_message_and_fall_through:  13
 ;     l00b8:                           12
-;     sub_c8350:                       12
+;     do_fs_op:                        12
 ;     c988a:                           12
 ;     tube_host_r2_data:               12
 ;     tube_host_r2_status:             11
@@ -5850,7 +5889,7 @@ l0d1e = sub_c0d1c+2
 ;     l0e05:                            4
 ;     l0e07:                            4
 ;     c8840:                            4
-;     c8d5c:                            4
+;     print_x_spaces:                   4
 ;     sub_c8d65:                        4
 ;     c92d6:                            4
 ;     l9a34:                            4
@@ -5955,7 +5994,7 @@ l0d1e = sub_c0d1c+2
 ;     sub_c819b:                        2
 ;     c81ac:                            2
 ;     c81c9:                            2
-;     sub_c81cc:                        2
+;     auto_boot:                        2
 ;     c8240:                            2
 ;     c8275:                            2
 ;     c82c3:                            2
@@ -5976,7 +6015,7 @@ l0d1e = sub_c0d1c+2
 ;     c8584:                            2
 ;     c85a1:                            2
 ;     sub_c85a5:                        2
-;     sub_c85af:                        2
+;     decimal_print_routine:            2
 ;     sub_c85bc:                        2
 ;     sub_c85ce:                        2
 ;     sub_c85eb:                        2
@@ -6108,7 +6147,7 @@ l0d1e = sub_c0d1c+2
 ;     l8014:                            1
 ;     l8020:                            1
 ;     l8044:                            1
-;     c8079:                            1
+;     comm_err:                         1
 ;     language_handler:                 1
 ;     service_handler:                  1
 ;     c80c8:                            1
@@ -6568,7 +6607,6 @@ l0d1e = sub_c0d1c+2
 ;     c0d0e
 ;     c0d14
 ;     c0d1a
-;     c8079
 ;     c809f
 ;     c80ae
 ;     c80c8
@@ -6702,7 +6740,6 @@ l0d1e = sub_c0d1c+2
 ;     c8d1c
 ;     c8d2a
 ;     c8d51
-;     c8d5c
 ;     c8d67
 ;     c8d75
 ;     c8d7e
@@ -7265,7 +7302,6 @@ l0d1e = sub_c0d1c+2
 ;     sub_c8172
 ;     sub_c819b
 ;     sub_c81bc
-;     sub_c81cc
 ;     sub_c81d1
 ;     sub_c822e
 ;     sub_c826f
@@ -7276,8 +7312,6 @@ l0d1e = sub_c0d1c+2
 ;     sub_c831c
 ;     sub_c8340
 ;     sub_c8346
-;     sub_c8349
-;     sub_c8350
 ;     sub_c8351
 ;     sub_c836a
 ;     sub_c8380
@@ -7299,7 +7333,6 @@ l0d1e = sub_c0d1c+2
 ;     sub_c8589
 ;     sub_c858a
 ;     sub_c85a5
-;     sub_c85af
 ;     sub_c85bc
 ;     sub_c85ce
 ;     sub_c85da
@@ -7330,11 +7363,9 @@ l0d1e = sub_c0d1c+2
 ;     sub_c89d1
 ;     sub_c89d2
 ;     sub_c89ea
-;     sub_c8bf2
 ;     sub_c8bfd
 ;     sub_c8cf7
 ;     sub_c8cfc
-;     sub_c8d06
 ;     sub_c8d1f
 ;     sub_c8d20
 ;     sub_c8d4f
@@ -7348,13 +7379,8 @@ l0d1e = sub_c0d1c+2
 ;     sub_c8ddf
 ;     sub_c8df2
 ;     sub_c8df7
-;     sub_c8e33
-;     sub_c8e53
-;     sub_c8e7b
-;     sub_c8ef0
 ;     sub_c8f57
 ;     sub_c8f68
-;     sub_c8f72
 ;     sub_c9007
 ;     sub_c9020
 ;     sub_c903d
@@ -7410,13 +7436,21 @@ l0d1e = sub_c0d1c+2
 ;     sub_c9f5b
 ;     sub_c9fcb
     assert (l825b - l824d) - 1 == &0d
-    assert <(c8079-1) == &78
+    assert <(bye-1) == &48
     assert <(c8145-1) == &44
     assert <(c8b92-1) == &91
     assert <(c9d45-1) == &44
+    assert <(call_tx-1) == &32
+    assert <(comm_err-1) == &78
+    assert <(do_fs_op_call-1) == &71
+    assert <(inf_all-1) == &f1
     assert <(l0130) == &30
     assert <(l8444) == &44
     assert <(l9bdd - 1) == &dc
+    assert <(logon-1) == &05
+    assert <(open_rxcb-1) == &ef
+    assert <(read_jsr_arg-1) == &52
+    assert <(read_set_server_ids-1) == &7a
     assert <(sub_c8069-1) == &68
     assert <(sub_c8172-1) == &71
     assert <(sub_c81bc-1) == &bb
@@ -7424,15 +7458,12 @@ l0d1e = sub_c0d1c+2
     assert <(sub_c826f-1) == &6e
     assert <(sub_c8278-1) == &77
     assert <(sub_c82fd-1) == &fc
-    assert <(sub_c8349-1) == &48
     assert <(sub_c85da-1) == &d9
     assert <(sub_c881f-1) == &1e
     assert <(sub_c89a1-1) == &a0
-    assert <(sub_c8bf2-1) == &f1
     assert <(sub_c8bfd-1) == &fc
     assert <(sub_c8cf7-1) == &f6
     assert <(sub_c8cfc-1) == &fb
-    assert <(sub_c8d06-1) == &05
     assert <(sub_c8d1f-1) == &1e
     assert <(sub_c8d20-1) == &1f
     assert <(sub_c8d73-1) == &72
@@ -7442,11 +7473,6 @@ l0d1e = sub_c0d1c+2
     assert <(sub_c8ddf-1) == &de
     assert <(sub_c8df2-1) == &f1
     assert <(sub_c8df7-1) == &f6
-    assert <(sub_c8e33-1) == &32
-    assert <(sub_c8e53-1) == &52
-    assert <(sub_c8e7b-1) == &7a
-    assert <(sub_c8ef0-1) == &ef
-    assert <(sub_c8f72-1) == &71
     assert <(sub_c903d-1) == &3c
     assert <(sub_c9063-1) == &62
     assert <(sub_c90cd-1) == &cc
@@ -7474,6 +7500,7 @@ l0d1e = sub_c0d1c+2
     assert <(sub_c9ce8-1) == &e7
     assert <(sub_c9cec-1) == &eb
     assert <(sub_c9d0b-1) == &0a
+    assert <bootup == &45
     assert <l96f6 == &f6
     assert <l9715 == &15
     assert <l9747 == &47
@@ -7498,13 +7525,21 @@ l0d1e = sub_c0d1c+2
     assert <l9ee9 == &e9
     assert <l9eff == &ff
     assert <l9f15 == &15
-    assert >(c8079-1) == &80
+    assert >(bye-1) == &83
     assert >(c8145-1) == &81
     assert >(c8b92-1) == &8b
     assert >(c9d45-1) == &9d
+    assert >(call_tx-1) == &8e
+    assert >(comm_err-1) == &80
+    assert >(do_fs_op_call-1) == &8f
+    assert >(inf_all-1) == &8b
     assert >(l0130) == &01
     assert >(l8444) == &84
     assert >(l9bdd - 1) == &9b
+    assert >(logon-1) == &8d
+    assert >(open_rxcb-1) == &8e
+    assert >(read_jsr_arg-1) == &8e
+    assert >(read_set_server_ids-1) == &8e
     assert >(sub_c8069-1) == &80
     assert >(sub_c8172-1) == &81
     assert >(sub_c81bc-1) == &81
@@ -7512,15 +7547,12 @@ l0d1e = sub_c0d1c+2
     assert >(sub_c826f-1) == &82
     assert >(sub_c8278-1) == &82
     assert >(sub_c82fd-1) == &82
-    assert >(sub_c8349-1) == &83
     assert >(sub_c85da-1) == &85
     assert >(sub_c881f-1) == &88
     assert >(sub_c89a1-1) == &89
-    assert >(sub_c8bf2-1) == &8b
     assert >(sub_c8bfd-1) == &8b
     assert >(sub_c8cf7-1) == &8c
     assert >(sub_c8cfc-1) == &8c
-    assert >(sub_c8d06-1) == &8d
     assert >(sub_c8d1f-1) == &8d
     assert >(sub_c8d20-1) == &8d
     assert >(sub_c8d73-1) == &8d
@@ -7530,11 +7562,6 @@ l0d1e = sub_c0d1c+2
     assert >(sub_c8ddf-1) == &8d
     assert >(sub_c8df2-1) == &8d
     assert >(sub_c8df7-1) == &8d
-    assert >(sub_c8e33-1) == &8e
-    assert >(sub_c8e53-1) == &8e
-    assert >(sub_c8e7b-1) == &8e
-    assert >(sub_c8ef0-1) == &8e
-    assert >(sub_c8f72-1) == &8f
     assert >(sub_c903d-1) == &90
     assert >(sub_c9063-1) == &90
     assert >(sub_c90cd-1) == &90
@@ -7562,6 +7589,7 @@ l0d1e = sub_c0d1c+2
     assert >(sub_c9ce8-1) == &9c
     assert >(sub_c9cec-1) == &9c
     assert >(sub_c9d0b-1) == &9d
+    assert >bootup == &82
     assert >l96f6 == &96
     assert >l9715 == &97
     assert >l9747 == &97
@@ -7588,9 +7616,11 @@ l0d1e = sub_c0d1c+2
     assert >l9f15 == &9f
     assert buffer_printer == &03
     assert copyright - rom_header == &0c
+    assert data_carier_detect == &20
     assert econet_INTOFF == &fe18
     assert econet_station_id == &fe18
     assert event_network_error == &08
+    assert internal_keyscan_N == &55
     assert l825b - c8240 == &1b
     assert l825e - c8240 == &1e
     assert l8261 - c8240 == &21
